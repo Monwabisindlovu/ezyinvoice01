@@ -1,5 +1,5 @@
-import React from 'react';
-import { PDFDownloadLink } from '@react-pdf/renderer'; // Import directly
+import React, { useState } from 'react';
+import { PDFDownloadLink } from '@react-pdf/renderer'; // Removed PDFViewer import
 import TaxModal from './TaxModal';
 import InvoiceHeader from './InvoiceHeader';
 import InvoiceAddresses from './InvoiceAddresses';
@@ -8,7 +8,7 @@ import InvoiceItems from './InvoiceItems';
 import InvoiceTotals from './InvoiceTotals';
 import InvoiceTermsAndSignature from './InvoiceTermsAndSignature';
 import { useInvoiceForm } from '../../hooks/useInvoiceForm';
-import InvoiceDocumentPDF from './InvoicePDF'; // Import your InvoiceDocumentPDF component
+import InvoiceDocumentPDF from './InvoicePDF';
 
 const InvoiceForm: React.FC = () => {
     const {
@@ -32,8 +32,9 @@ const InvoiceForm: React.FC = () => {
     } = useInvoiceForm();
 
     return (
-        <div>
-            <div className="py-8 px-6 my-6 flex min-h-screen shadow-2xl rounded-2xl max-w-4xl flex-col mx-auto">
+        <div className="flex flex-col lg:flex-row min-h-screen lg:space-x-6">
+            {/* Invoice Form Section */}
+            <div className="py-8 px-6 my-6 flex min-h-screen shadow-2xl rounded-2xl max-w-4xl flex-col mx-auto border-4 border-gray-100">
                 {/* Header Section */}
                 <InvoiceHeader
                     from={invoiceData.from}
@@ -104,32 +105,55 @@ const InvoiceForm: React.FC = () => {
                         }
                     />
                 )}
+
+                {/* Generate PDF Button */}
+                <div className="my-4 justify-center flex">
+                    <PDFDownloadLink
+                        document={
+                            <InvoiceDocumentPDF
+                                invoiceData={{
+                                    ...invoiceData,
+                                    termsConditions,
+                                    currencySymbol: currencySymbol,
+                                }}
+                            />
+                        }
+                        fileName={`invoice_${invoiceData.invoiceNumber || Date.now()}.pdf`}
+                        className="py-2 shadow-2xl bg-purple-500 text-white rounded-md hover:bg-purple-600 w-full text-center"
+                    >
+                        {({ loading }: { loading: boolean }) =>
+                            loading ? 'Generating PDF...' : 'Generate PDF'
+                        }
+                    </PDFDownloadLink>
+                </div>
             </div>
 
-            {/* Generate PDF Button */}
-            <div className="my-4 max-w-4xl justify-center flex mx-auto">
-                <PDFDownloadLink
-                    document={
+            {/* 
+            // PDF Viewer Section (Commented Out)
+            {isPdfVisible && (
+                <div className="flex-1 shadow-lg rounded-2xl border-4 border-blue-900">
+                    <PDFViewer className="w-full h-full rounded-2xl">
                         <InvoiceDocumentPDF
                             invoiceData={{
                                 ...invoiceData,
                                 termsConditions,
                                 currencySymbol: currencySymbol,
-                              
                             }}
                         />
-                    }
-                    fileName={`invoice_${invoiceData.invoiceNumber || Date.now()}.pdf`}
-                    className="py-2 shadow-2xl bg-purple-500 text-white rounded-md hover:bg-purple-600 w-full text-center"
-                >
-                    {({ loading }: { loading: boolean }) =>
-                        loading ? 'Generating PDF...' : 'Generate PDF'
-                    }
-                </PDFDownloadLink>
-            </div>
+                    </PDFViewer>
+                </div>
+            )}
+
+            // Toggle PDF Viewer Button (Commented Out)
+            <button
+                onClick={() => setPdfVisible((prev) => !prev)}
+                className="fixed bottom-4 right-4 p-2 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600"
+            >
+                {isPdfVisible ? 'Hide PDF Viewer' : 'Show PDF Viewer'}
+            </button>
+            */}
         </div>
     );
 };
 
 export default InvoiceForm;
-

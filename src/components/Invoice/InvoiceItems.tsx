@@ -23,18 +23,18 @@ interface InvoiceItemsProps {
 }
 
 const InvoiceItems: React.FC<InvoiceItemsProps> = ({
-                                                       items,
-                                                       onItemChange,
-                                                       onOpenTaxModal,
-                                                       onRemoveItem,
-                                                       onAddNewItem,
-                                                   }) => {
+    items,
+    onItemChange,
+    onOpenTaxModal,
+    onRemoveItem,
+    onAddNewItem,
+}) => {
     return (
         <div>
             {items.map((item, index) => (
-                <div key={index} className="flex flex-row space-x-4 mb-4">
+                <div key={index} className="flex flex-row items-center space-x-2 mb-4">
                     <div className="flex-1">
-                        <div className="flex flex-row items-center space-x-4">
+                        <div className="flex flex-row items-center space-x-2">
                             <InputField
                                 label="Description"
                                 name="description"
@@ -69,7 +69,7 @@ const InvoiceItems: React.FC<InvoiceItemsProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => onOpenTaxModal(index)}
-                                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+                                    className="px-4 py-2 bg-blue-800 text-white rounded-md hover:bg-blue-900"
                                 >
                                     {item.taxName ? `${item.taxName} ${item.taxPercentage}%` : 'Add Tax'}
                                 </button>
@@ -93,8 +93,7 @@ const InvoiceItems: React.FC<InvoiceItemsProps> = ({
             <div className="flex flex-col space-y-4 flex-1">
                 <button
                     onClick={onAddNewItem}
-                    className="py-2 bg-light-navy-blue text-white rounded-md hover:bg-light-navy-blue-darker w-full"
-                    style={{ backgroundColor: '#E0E6ED', color: '#1A1F36' }}
+                    className="py-2 bg-blue-800 text-white rounded-md hover:bg-blue-900 w-full"
                 >
                     Add New Item
                 </button>

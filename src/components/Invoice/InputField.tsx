@@ -34,7 +34,7 @@ const InputField: React.FC<InputProps> = ({
                     onChange={ onChange }
                     placeholder={ placeholder }
                     rows={ rows }
-                    className="block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    className="block w-full border border-purple-300 rounded-md shadow-sm p-2"
                     style={ { resize: 'none' } }
                 />
             ) : (
@@ -44,7 +44,7 @@ const InputField: React.FC<InputProps> = ({
                     value={ value }
                     onChange={ onChange }
                     placeholder={ placeholder }
-                    className="block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                   className="block w-full border border-purple-300 rounded-md shadow-sm p-2"
                 />
             ) }
         </div>

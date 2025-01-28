@@ -3,11 +3,10 @@ import NewInvoiceItems from './NewInvoiceItems';
 import ImageUploader from './ImageUploader';
 import NotesSection from './NotesSection';
 import TotalsSection from './TotalsSection';
-import CurrencySelector from './CurrencySelector';
-import { CURRENCIES } from '../../utils/currency';
+import CurrencySelector from './CurrencySelector'; // Currency selector component
+import { CURRENCIES, Currency, formatCurrency } from '../../utils/currency';
 import NewInvoiceDocument from './NewInvoiceDocument'; // PDF template import
 import { PDFDownloadLink } from '@react-pdf/renderer'; // React PDF
-import { CurrencyProvider } from './CurrencyContext'; 
 
 const NewInvoiceTemplate: React.FC = () => {
   // State for invoice data
@@ -37,15 +36,15 @@ const NewInvoiceTemplate: React.FC = () => {
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
   const [signature, setSignature] = useState<File | null>(null);
 
-  // Currency change handler
-  const handleCurrencyChange = (currencyCode: string) => {
-    setSelectedCurrency(currencyCode);
-    const currency = CURRENCIES.find((c) => c.code === currencyCode);
-    if (currency) {
-      setCurrencySymbol(currency.symbol);
-    }
-  };
+  // Currency state
+  const [currency, setCurrency] = useState<Currency>({ name: 'USD', code: 'USD', symbol: '$' });
 
+  // Currency change handler
+  const handleCurrencyChange = (currency: Currency) => {
+    setCurrency(currency); // Ensure the currency includes the 'name', 'code', and 'symbol'
+    setCurrencySymbol(currency.symbol); // Update the symbol
+  };
+  
   // Item change handler
   const handleItemChange = (index: number, field: 'item' | 'description' | 'quantity' | 'rate' | 'amount', value: string | number) => {
     const newItems = [...items];
@@ -199,11 +198,12 @@ const NewInvoiceTemplate: React.FC = () => {
   
       {/* Itemized Charges Section */}
       <NewInvoiceItems
-  items={items}
-  onItemChange={handleItemChange}
-  onRemoveItem={removeItem}
-  onAddNewItem={addItem}
-/>
+      items={items}
+      currency={currency} // Pass currency here
+      onItemChange={handleItemChange}
+      onRemoveItem={removeItem}
+      onAddNewItem={addItem}
+    />
   
       {/* Notes and Totals Sections */}
       <div className="flex justify-between mt-6 mb-4">
@@ -223,9 +223,9 @@ const NewInvoiceTemplate: React.FC = () => {
         <div className="flex flex-col w-full sm:w-1/3">
           <div className="flex items-center justify-between mb-1">
             <CurrencySelector
-              selectedCurrency={selectedCurrency}
-              onCurrencyChange={handleCurrencyChange}
-              className="text-xs"
+               selectedCurrency={currency.code} // Pass the code of the current currency
+               onCurrencyChange={handleCurrencyChange} // Pass the full Currency object to update the context
+               className="text-xs"
             />
           </div>
   

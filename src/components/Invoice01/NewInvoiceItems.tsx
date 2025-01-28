@@ -1,6 +1,5 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import currencySymbolMap from 'currency-symbol-map';
-import { CurrencyContext } from './CurrencyContext';
 
 interface ItemData {
     item: string;
@@ -10,16 +9,27 @@ interface ItemData {
     amount: number;
 }
 
+interface Currency {
+    symbol: string;
+    code: string;
+}
+
 interface NewInvoiceItemsProps {
     items: ItemData[];
+    currency: Currency;
     onItemChange: (index: number, field: keyof ItemData, value: string | number) => void;
     onRemoveItem: (index: number) => void;
     onAddNewItem: () => void;
 }
 
-const NewInvoiceItems: React.FC<NewInvoiceItemsProps> = ({ items, onItemChange, onRemoveItem, onAddNewItem }) => {
-    const { selectedCurrency } = useContext(CurrencyContext);  // Get the selected currency from the context
-    const currencySymbol = currencySymbolMap(selectedCurrency) || selectedCurrency;  // Get the currency symbol
+const NewInvoiceItems: React.FC<NewInvoiceItemsProps> = ({
+    items,
+    currency,
+    onItemChange,
+    onRemoveItem,
+    onAddNewItem
+}) => {
+    const currencySymbol = currency.symbol || currencySymbolMap(currency.code) || currency.code;
 
     return (
         <div className="mb-1">

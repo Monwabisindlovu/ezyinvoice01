@@ -51,7 +51,7 @@ const NewInvoiceItems: React.FC<NewInvoiceItemsProps> = ({
                                     placeholder="Item Description/Services..."
                                     value={item.description}
                                     onChange={(e) => onItemChange(index, 'description', e.target.value)}
-                                    className="border rounded-md p-0.5 w-full text-xs"
+                                    className="border rounded-md p-0.5 w-full text-xs mb-2 placeholder:font-bold"
                                     style={{ height: '40px' }}
                                 />
                             </td>
@@ -102,7 +102,7 @@ const NewInvoiceItems: React.FC<NewInvoiceItemsProps> = ({
             </table>
             <button
                 onClick={onAddNewItem}
-                className="bg-blue-500 text-white px-2 py-0.5 rounded-md text-xs"
+                className="bg-gray-800 text-white px-2 py-0.5 rounded-md text-xs"
             >
                 Add Item
             </button>

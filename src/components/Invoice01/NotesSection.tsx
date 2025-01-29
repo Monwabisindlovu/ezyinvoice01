@@ -36,7 +36,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({
           type="text"
           value={notesHeader || 'Banking Details'}
           onChange={(e) => onNotesHeaderChange(e.target.value)}
-          className="border rounded-md p-0.5 w-full text-xs mb-2 font-bold"
+          className="border rounded-md p-0.5 w-full text-xs mb-2 placeholder:font-bold"
           placeholder="Banking Details"
         />
 
@@ -47,8 +47,8 @@ const NotesSection: React.FC<NotesSectionProps> = ({
             type="text"
             value={notesContent.accountName}
             onChange={(e) => onNotesContentChange({ ...notesContent, accountName: e.target.value })}
-            className="border rounded-md p-0.5 w-full text-xs"
-            placeholder="Sparks and Clicks Electrical Services"
+            className="border rounded-md p-0.5 w-full text-xs  mb-2 placeholder:font-bold"
+            placeholder="Sparks & Clicks Electrical Services"
           />
         </div>
 
@@ -59,7 +59,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({
             type="text"
             value={notesContent.bankName}
             onChange={(e) => onNotesContentChange({ ...notesContent, bankName: e.target.value })}
-            className="border rounded-md p-0.5 w-full text-xs"
+            className="border rounded-md p-0.5 w-full text-xs  mb-2 placeholder:font-bold"
             placeholder="First National Bank"
           />
         </div>
@@ -71,7 +71,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({
             type="text"
             value={notesContent.branchCode}
             onChange={(e) => onNotesContentChange({ ...notesContent, branchCode: e.target.value })}
-            className="border rounded-md p-0.5 w-full text-xs"
+            className="border rounded-md p-0.5 w-full text-xs  mb-2 placeholder:font-bold"
             placeholder="211113"
           />
         </div>
@@ -83,7 +83,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({
             type="text"
             value={notesContent.accountNumber}
             onChange={(e) => onNotesContentChange({ ...notesContent, accountNumber: e.target.value })}
-            className="border rounded-md p-0.5 w-full text-xs"
+            className="border rounded-md p-0.5 w-full text-xs  mb-2 placeholder:font-bold"
             placeholder="22222557688"
           />
         </div>
@@ -100,7 +100,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({
         value={termsContent}
         onChange={(e) => onTermsContentChange(e.target.value)}
         placeholder="Terms and Conditions (optional)..."
-        className="border rounded-md p-0.5 w-full text-xs resize-none"
+        className="border rounded-md p-0.5 w-full text-xs resize-none  mb-2 placeholder:font-bold"
         style={{ maxWidth: '570px', height: 'calc(1.25rem * 4 + 18px)' }} // 4 visible lines and max width of 570px
       />
     </div>

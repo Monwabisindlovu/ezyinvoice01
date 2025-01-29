@@ -112,13 +112,13 @@ const NewInvoiceTemplate: React.FC = () => {
           />
         </div>
         <div className="flex flex-col">
-          <h2 className="text-sm font-bold uppercase self-start">Invoice</h2>
+          <h3 className="text-sm font-bold uppercase self-start">Invoice</h3>{/* Made bold */}
           <input
             type="text"
             placeholder="Invoice Number"
             value={invoiceNumber}
             onChange={(e) => setInvoiceNumber(e.target.value)}
-            className="border rounded-md p-0.5 w-full text-xs mt-0.5"
+            className="border rounded-md p-0.5 w-full text-xs mt-0.5 placeholder:font-bold"
           />
         </div>
       </div>
@@ -128,7 +128,7 @@ const NewInvoiceTemplate: React.FC = () => {
         <div className="flex-none w-1/3 pr-4 mt-6">
           <textarea
             placeholder="From information..." 
-            className="border rounded-md p-0.5 w-full h-10 text-xs mb-2"
+            className="border rounded-md p-0.5 w-full h-10 text-xs mb-2 placeholder:font-bold"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
             style={{ height: '50px' }}
@@ -138,13 +138,13 @@ const NewInvoiceTemplate: React.FC = () => {
         <div className="flex-grow"></div>
   
         <div className="flex-none pl-10 w-1/4 mt-4">
-          <h3 className="text-xs font-semibold mb-0.5">Invoice Date</h3>
+          <h3 className="text-xs font-semibold mb-0.5">Invoice Date</h3>{/* Made bold */}
           <input
             type="text"
             placeholder="Invoice Date"
             value={invoiceDate}
             onChange={(e) => setInvoiceDate(e.target.value)}
-            className="border rounded-md p-0.5 w-full text-xs mb-2"
+            className="border rounded-md p-0.5 w-full text-xs mb-2 placeholder:font-bold"
             style={{ height: '34px', width: '100%' }}
           />
           <h3 className="text-xs font-semibold mb-0.5 mt-2">Due Date</h3>
@@ -153,7 +153,7 @@ const NewInvoiceTemplate: React.FC = () => {
             placeholder="Due Date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="border rounded-md p-0.5 w-full text-xs mb-2"
+            className="border rounded-md p-0.5 w-full text-xs mb-2 placeholder:font-bold"
             style={{ height: '34px', width: '100%' }}
           />
         </div>
@@ -162,35 +162,35 @@ const NewInvoiceTemplate: React.FC = () => {
       {/* Bill To, Ship To, and PO Number Section */}
       <div className="flex justify-between mb-2">
         <div className="flex-none w-1/3" style={{ marginRight: '-1px' }}>
-          <h3 className="text-xs mb-0.5">{billToHeader}</h3>
+          <h3 className="text-xs mb-0.5">{billToHeader}</h3>{/* Made bold */}
           <textarea
             value={billTo}
             onChange={(e) => setBillTo(e.target.value)}
             placeholder="Bill to information..."
-            className="border rounded-md p-0.5 w-full text-xs"
+            className="border rounded-md p-0.5 w-full text-xs placeholder:font-bold"
             style={{ height: '50px' }}
           />
         </div>
   
         <div className="flex-none w-1/4" style={{ marginLeft: '-70px' }}>
-          <h3 className="text-xs mb-0.5">{shipToHeader}</h3>
+          <h3 className="text-xs mb-0.5">{shipToHeader}</h3>{/* Made bold */}
           <textarea
             value={shipTo}
             onChange={(e) => setShipTo(e.target.value)}
             placeholder="Shipping information (optional)..."
-            className="border rounded-md p-0.5 w-full text-xs"
+            className="border rounded-md p-0.5 w-full text-xs placeholder:font-bold"
             style={{ height: '50px' }}
           />
         </div>
   
         <div className="flex-none pl-10 w-1/4 mt-4">
-          <h3 className="text-xs mb-0.5">PO#</h3>
+          <h3 className="text-xs mb-0.5">PO#</h3>{/* Made bold */}
           <input
             type="text"
             placeholder="PO# (optional)"
             value={poNumber}
             onChange={(e) => setPoNumber(e.target.value)}
-            className="border rounded-md p-0.5 w-full text-xs"
+            className="border rounded-md p-0.5 w-full text-xs placeholder:font-bold"
             style={{ height: '34px', width: '100%' }}
           />
         </div>
@@ -241,7 +241,7 @@ const NewInvoiceTemplate: React.FC = () => {
           </div>
   
           <div className="mt-6 flex flex-col justify-end flex-shrink-0">
-            <h3 className="text-xs font-semibold mb-1">Signature</h3>
+            <h3 className="text-xs font-semibold mb-1">Signature</h3>{/* Made bold */}
             <ImageUploader
               image={signature ? URL.createObjectURL(signature) : null}
               onChange={handleSignatureChange}
@@ -257,7 +257,7 @@ const NewInvoiceTemplate: React.FC = () => {
         <PDFDownloadLink
           document={<NewInvoiceDocument invoiceData={invoiceData} />}
           fileName={`invoice_${invoiceData.invoiceNumber || Date.now()}.pdf`}
-          className="py-2 shadow-2xl bg-purple-500 text-white rounded-md hover:bg-purple-600 w-full text-center"
+          className="py-2 shadow-2xl bg-gray-800 text-white rounded-md hover:bg-gray-800 w-full text-center"
         >
           {({ loading }: { loading: boolean }) =>
             loading ? 'Generating PDF...' : 'Generate PDF'

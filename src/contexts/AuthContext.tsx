@@ -1,46 +1,59 @@
-import React, { createContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type AuthContextType = {
-    user: any; // Replace with your user type
-    login: (email: string, password: string) => Promise<void>;
-    register: (username: string, email: string, password: string) => Promise<void>;
-    logout: () => void;
-};
+// Define the AuthContext and the values it provides
+interface AuthContextType {
+  isLoggedIn: boolean;
+  login: (token: string) => void;
+  logout: () => void;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 type AuthProviderProps = {
-    children: ReactNode; // Specify children prop type
+  children: ReactNode; // Specify children prop type
 };
 
+// Provider component to wrap the app and provide authentication state globally
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-    const [user, setUser] = useState<any>(null); // Replace with your user type
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    const handleLogin = async (email: string, password: string) => {
-        // Your login logic here
-    };
+  // Check if a token exists in localStorage or sessionStorage on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
-    const handleRegister = async (username: string, email: string, password: string) => {
-        // Your register logic here
-    };
+  // Handle login
+  const login = (token: string) => {
+    // Store token in localStorage or sessionStorage
+    localStorage.setItem('token', token); // or use sessionStorage for temporary sessions
+    setIsLoggedIn(true);
+  };
 
-    const handleLogout = () => {
-        // Your logout logic here
-    };
+  // Handle logout
+  const logout = () => {
+    // Remove token and update state
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    setIsLoggedIn(false);
+  };
 
-    return (
-        <AuthContext.Provider value={{ user, login: handleLogin, register: handleRegister, logout: handleLogout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-export const useAuth = () => {
-    const context = React.useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+// Custom hook to use auth context in components
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
 
 export default AuthContext;

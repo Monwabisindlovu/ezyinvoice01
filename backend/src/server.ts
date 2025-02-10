@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import authRoutes from './routes/authRoutes';
+import authRoutes from './routes/authRoutes'; // Corrected path for authRoutes
 
 dotenv.config();
 
@@ -10,7 +10,7 @@ const app = express();
 
 // CORS Middleware: Allow requests from frontend
 const corsOptions = {
-  origin: 'http://localhost:3000',  // Allow your React frontend domain
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Adjust the URL to your frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these HTTP methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
   credentials: true, // Allow credentials (cookies, etc.)
@@ -22,10 +22,17 @@ app.use(cors(corsOptions)); // Applying CORS middleware with options
 app.use(express.json());
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes); // Use the auth routes
+
+// Test route
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost/ezyinvoice')
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost/ezyinvoice', {
+  // Removed useNewUrlParser and useUnifiedTopology, as they are not required in the latest Mongoose versions
+})
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.log('MongoDB connection error:', err));
 

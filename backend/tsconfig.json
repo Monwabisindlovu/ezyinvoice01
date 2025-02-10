@@ -3,6 +3,7 @@
     "target": "ES6",
     "module": "CommonJS",
     "outDir": "./dist",
+    "rootDir": "./src",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -10,9 +11,9 @@
     "resolveJsonModule": true,
     "typeRoots": [
       "node_modules/@types",
-      "src/types" // Add this line if you're using custom type declarations
+      "src/types"
     ]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/types/**/*.d.ts"],
   "exclude": ["node_modules"]
 }

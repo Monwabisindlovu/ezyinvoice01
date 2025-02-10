@@ -1,4 +1,3 @@
-// src/components/Header.tsx
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -22,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, setIsLoggedIn }) => {
         <h1 className="text-3xl font-bold">EzyInvoice</h1>
       </div>
       <nav className="flex space-x-4">
-        {/* {!isLoggedIn ? (
+        {!isLoggedIn ? (
           <>
             <Link to="/login" className="text-blue-300 hover:text-white">Login</Link>
             <Link to="/register" className="text-blue-300 hover:text-white">Register</Link>
@@ -31,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, setIsLoggedIn }) => {
           <>
             <button onClick={handleLogout} className="text-blue-300 hover:text-white">Logout</button>
           </>
-        )} */}
+        )}
         <Link to="/dashboard" className="text-blue-300 hover:text-white">Dashboard</Link>
       </nav>
     </header>

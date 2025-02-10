@@ -1,21 +1,42 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-interface IUser extends Document {
-  name: string;
-  emailOrPhone: string;
+export interface IUser extends Document {
+  email?: string;
+  phone?: string;
   password: string;
-  countryOfResidency: string;
-  isEmail: boolean;
+  securityQuestions: Array<{
+    question: string;
+    answer: string;
+  }>;
+  googleId?: string; // Optional for Google OAuth integration
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const UserSchema: Schema = new Schema({
-  name: { type: String, required: true },
-  emailOrPhone: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  countryOfResidency: { type: String, required: true },
-  isEmail: { type: Boolean, required: true },
+const UserSchema: Schema = new Schema<IUser>(
+  {
+    email: { type: String, unique: true, sparse: true }, // Unique but sparse to allow NULL values
+    phone: { type: String, unique: true, sparse: true }, // Unique but sparse to allow NULL values
+    password: { type: String, required: true },
+    securityQuestions: [
+      {
+        question: { type: String, required: true },
+        answer: { type: String, required: true }
+      }
+    ],
+    googleId: { type: String, unique: true, sparse: true }, // Optional for OAuth integration
+  },
+  { timestamps: true }
+);
+
+// Create a virtual field for emailOrPhone
+UserSchema.virtual('emailOrPhone').get(function (this: IUser) {
+  return this.email || this.phone;
 });
 
-const User = mongoose.model<IUser>('User', UserSchema);
+// Ensure virtuals are included in JSON and object responses
+UserSchema.set('toJSON', { virtuals: true });
+UserSchema.set('toObject', { virtuals: true });
 
+const User = mongoose.model<IUser>('User', UserSchema);
 export default User;

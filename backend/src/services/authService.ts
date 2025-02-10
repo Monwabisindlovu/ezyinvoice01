@@ -1,45 +1,98 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
+import User, { IUser } from '../models/User'; 
+import { OAuth2Client } from 'google-auth-library';
+import dotenv from 'dotenv';
+import { Types } from 'mongoose';
 
-const registerUser = async (name: string, emailOrPhone: string, password: string, countryOfResidency: string, isEmail: boolean) => {
-  // Check if the user already exists
-  const userExists = await User.findOne({ emailOrPhone });
-  if (userExists) {
-    throw new Error('User already exists');
-  }
+dotenv.config();
 
-  // Hash the password
-  const hashedPassword = await bcrypt.hash(password, 10);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-  // Create new user
-  const newUser = new User({
-    name,
-    emailOrPhone,
-    password: hashedPassword,
-    countryOfResidency,
-    isEmail
-  });
-
-  await newUser.save();
+// Function to hash the password
+export const hashPassword = async (password: string): Promise<string> => {
+  const salt = await bcrypt.genSalt(10);
+  return bcrypt.hash(password, salt);
 };
 
-const loginUser = async (emailOrPhone: string, password: string) => {
-  // Find the user
-  const user = await User.findOne({ emailOrPhone });
+// Function to compare passwords
+export const comparePassword = async (password: string, hashedPassword: string): Promise<boolean> => {
+  return bcrypt.compare(password, hashedPassword);
+};
+
+// Function to create JWT token
+export const createJwtToken = (userId: string): string => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+};
+
+// Function to create JWT refresh token
+export const createRefreshToken = (userId: string): string => {
+  return jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET!, { expiresIn: '7d' });
+};
+
+// Function to verify Google OAuth token
+export const verifyGoogleToken = async (token: string): Promise<any> => {
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.GOOGLE_CLIENT_ID,  // Specify the client ID of your app
+  });
+  return ticket.getPayload();
+};
+
+// Function to create a new user in the database
+export const registerUser = async (email: string, password: string): Promise<IUser> => {
+  const hashedPassword = await hashPassword(password);
+  const user = new User({ email, password: hashedPassword });
+  return user.save();
+};
+
+// Function to find a user by email
+export const findUserByEmail = async (email: string): Promise<IUser | null> => {
+  return User.findOne({ email });
+};
+
+// Function to handle user login
+export const loginUser = async (email: string, password: string): Promise<any> => {
+  const user = await findUserByEmail(email);
   if (!user) {
-    throw new Error('Invalid credentials');
+    throw new Error('User not found');
   }
 
-  // Compare password
-  const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await comparePassword(password, user.password);
   if (!isMatch) {
     throw new Error('Invalid credentials');
   }
 
-  // Generate token
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET!, { expiresIn: '1h' });
-  return token;
+  // Explicitly cast _id to ObjectId to avoid type error
+  const userId = user._id as Types.ObjectId;
+
+  // Create tokens
+  const accessToken = createJwtToken(userId.toString()); // Ensure _id is a string
+  const refreshToken = createRefreshToken(userId.toString()); // Ensure _id is a string
+
+  return { accessToken, refreshToken, user };
 };
 
-export { registerUser, loginUser };
+// Function to verify refresh token
+export const verifyRefreshToken = (token: string): any => {
+  try {
+    return jwt.verify(token, process.env.JWT_REFRESH_SECRET!);
+  } catch (error) {
+    throw new Error('Invalid or expired refresh token');
+  }
+};
+
+// Export default as an object containing all methods
+const authService = {
+  hashPassword,
+  comparePassword,
+  createJwtToken,
+  createRefreshToken,
+  verifyGoogleToken,
+  registerUser,
+  findUserByEmail,
+  loginUser,
+  verifyRefreshToken,
+};
+
+export default authService;

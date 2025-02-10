@@ -1,3 +1,2 @@
-"backend/.env" 
-".env" 
-".env" 
+# Ignore all .env files throughout the entire project
+*.env

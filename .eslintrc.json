@@ -3,7 +3,10 @@
     "next/core-web-vitals"
   ],
   "rules": {
-    // You can add custom rules here if needed, for example:
+    // Disable the rule about using <img> in non-Next.js apps
+    "@next/next/no-img-element": "off",
+
+    // You can add other custom rules as needed
     "no-console": "warn",
     "react/prop-types": "off"
   }

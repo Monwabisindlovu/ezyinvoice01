@@ -1,95 +1,71 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InvoiceForm from '../components/Invoice/InvoiceForm';
 import NewInvoiceTemplate from '../components/Invoice01/NewInvoiceTemplate';
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  isAuthenticated: boolean;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ isAuthenticated, setIsAuthenticated }) => {
   const [selectedTemplate, setSelectedTemplate] = useState<'template01' | 'template02'>('template01');
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication state
-  const [isNewUser, setIsNewUser] = useState(false); // Track if user is newly registered
   const navigate = useNavigate();
 
-  // Simulate checking if the user is authenticated (replace with actual logic)
-  useEffect(() => {
-    const userAuthStatus = localStorage.getItem('isAuthenticated');
-    const userIsNew = localStorage.getItem('isNewUser') === 'true';
+  const promptLogin = () => {
+    alert('Please log in or sign up to use this feature.');
+    navigate('/login');
+  };
 
-    if (userAuthStatus === 'true') {
-      setIsAuthenticated(true);
-      setIsNewUser(userIsNew);
-    }
-  }, []);
-
-  const handleLogout = () => {
-    // Simulate logging out (clear authentication data)
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('isNewUser');
-    setIsAuthenticated(false);
-    navigate('/login'); // Redirect to login page
+  const handleTemplateClick = (template: 'template01' | 'template02') => {
+    setSelectedTemplate(template);
   };
 
   return (
-    <div className="p-6 space-y-4">
-      {/* Post-login Behavior */}
-      {isAuthenticated ? (
-        <div className="flex justify-between mb-4">
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setSelectedTemplate('template01')}
-              className={`${
-                selectedTemplate === 'template01' ? 'text-blue-500' : 'text-gray-500'
-              } hover:underline`}
-            >
-              Template 01
-            </button>
-            <button
-              onClick={() => setSelectedTemplate('template02')}
-              className={`${
-                selectedTemplate === 'template02' ? 'text-blue-500' : 'text-gray-500'
-              } hover:underline`}
-            >
-              Template 02
-            </button>
-          </div>
+    <div className="p-8 max-w-5xl mx-auto">
+      {/* Template Selection */}
+      <div className="flex items-center space-x-8">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white" style={{ marginLeft: '-50px' }}>
+          Choose Your <span className="text-blue-600">Invoice Template</span>
+        </h2>
 
-          {/* Display "My Account" link and "Logout" button */}
-          <div className="flex space-x-4">
-            <button className="text-gray-500 hover:underline">My Account</button>
-            <button
-              onClick={handleLogout}
-              className="text-red-500 hover:underline"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      ) : (
-        // Show Signup/Login links if not authenticated
-        <div className="flex space-x-4 mb-4">
-          {!isNewUser ? (
-            <button
-              onClick={() => navigate('/signup')}
-              className="text-gray-500 hover:underline"
-            >
-              Sign Up
-            </button>
-          ) : (
-            <button
-              onClick={() => navigate('/login')}
-              className="text-gray-500 hover:underline"
-            >
-              Login
-            </button>
-          )}
-        </div>
-      )}
+        <div className="flex space-x-4">
+          {/* InvoFlow (Always Available) */}
+          <button 
+            className={`p-2 rounded-md shadow-md cursor-pointer transition w-48 h-14 flex flex-col items-center justify-center text-center ${
+              selectedTemplate === 'template01' ? 'border-2 border-blue-600 bg-blue-50' : 'bg-gray-100 hover:bg-gray-200'
+            }`} 
+            onClick={() => handleTemplateClick('template01')}
+          >
+            <h3 className="text-sm font-semibold text-blue-700">InvoFlow</h3>
+            <span className="text-xs text-gray-600">Sleek and simple invoicing</span>
+          </button>
 
-      {/* Render the selected template */}
-      {selectedTemplate === 'template01' ? <InvoiceForm /> : null}
-      {selectedTemplate === 'template02' ? <NewInvoiceTemplate /> : null}
+          {/* EquiBill (Requires Login) */}
+          <button 
+            className={`p-2 rounded-md shadow-md cursor-pointer transition w-48 h-14 flex flex-col items-center justify-center text-center ${
+              selectedTemplate === 'template02' ? 'border-2 border-green-600 bg-green-50' : 'bg-gray-100 hover:bg-gray-200'
+            }`} 
+            onClick={() => handleTemplateClick('template02')}
+          >
+            <h3 className="text-sm font-semibold text-green-700">EquiBill</h3>
+            <span className="text-xs text-gray-600">Professional and balanced billing</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Template Rendering */}
+      <div className="mt-6">
+        {/* InvoFlow is always accessible */}
+        {selectedTemplate === 'template01' && (
+          <InvoiceForm isAuthenticated={isAuthenticated} promptLogin={promptLogin} />
+        )}
+
+        {/* EquiBill requires authentication */}
+        {isAuthenticated && selectedTemplate === 'template02' && <NewInvoiceTemplate />}
+      </div>
     </div>
   );
 };
 
 export default Dashboard;
-

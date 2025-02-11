@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import authService from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
+import authService from '../../services/authService';
 import { FcGoogle } from 'react-icons/fc';
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 
-const Login = () => {
+interface LoginProps {
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -39,6 +43,8 @@ const Login = () => {
       const response = await authService.login(loginData);
       alert(response.message || 'Login successful!');
       setError('');
+      setIsAuthenticated(true);
+      localStorage.setItem('isAuthenticated', 'true');
       navigate('/dashboard');
     } catch (error: any) {
       setError(error.message || 'An unexpected error occurred.');

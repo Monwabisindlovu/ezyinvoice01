@@ -146,9 +146,10 @@ const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => {
                 {/* Header */}
                 <View style={styles.header}>
                     <View style={styles.companyInfo}>
-                        {invoiceData.logo && (
-                            <Image src={invoiceData.logo} style={styles.logo} />
-                        )}
+                    {invoiceData.logo && (
+    // eslint-disable-next-line jsx-a11y/alt-text
+    <Image src={invoiceData.logo} style={styles.logo} />
+)}
                         <Text>{invoiceData.from}</Text>
                     </View>
                     <Text style={styles.invoiceTitle}>INVOICE</Text>
@@ -220,13 +221,18 @@ const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => {
                     </View>
                 </View>
 
-                {/* Signature */}
                 {invoiceData.signature && (
-                    <View style={styles.signature}>
-                        <Image src={invoiceData.signature} style={{ width: 100, height: 50 }} />
-                        <Text>Authorized Signature</Text>
-                    </View>
-                )}
+    <View style={styles.signature}>
+        {/* eslint-disable-next-line jsx-a11y/alt-text */}
+        <Image 
+            src={typeof invoiceData.signature === "string" ? invoiceData.signature : ""} 
+            style={{ width: 100, height: 50 }} 
+        />
+        <Text>Authorized Signature</Text>
+    </View>
+)}
+
+
 
                 {/* Terms and Conditions */}
                 {invoiceData.termsConditions && (

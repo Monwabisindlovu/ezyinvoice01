@@ -1,9 +1,8 @@
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import currencyCodes from 'currency-codes';
 import currencySymbolMap from 'currency-symbol-map';
 
 interface ItemData {
-    [x: string]: any;
     qty: string;
     description: string;
     unitPrice: string;
@@ -69,7 +68,6 @@ export const useInvoiceForm = () => {
     const [termsConditions, setTermsConditions] = useState('');
     const [isTaxModalOpen, setIsTaxModalOpen] = useState(false);
     const [currentItemIndex, setCurrentItemIndex] = useState<number | null>(null);
-    const [selectedCurrency, setSelectedCurrency] = useState<string>('R'); 
 
     // Get the list of all currencies
     const currencyList = currencyCodes.data.map((currency) => ({
@@ -78,7 +76,7 @@ export const useInvoiceForm = () => {
     }));
 
     // Calculate subtotal, VAT, and total
-    const calculateTotals = () => {
+    const calculateTotals = useCallback(() => {
         let subtotal = 0;
         let vat = 0;
 
@@ -103,11 +101,11 @@ export const useInvoiceForm = () => {
             total: subtotal + vat,
             vatPercentage: vat > 0 && subtotal > 0 ? (vat / subtotal) * 100 : 0,
         }));
-    };
+    }, [invoiceData.items]); // Dependency array includes only invoiceData.items
 
     useEffect(() => {
         calculateTotals();
-    }, [invoiceData.items, vatPercentage]);
+    }, [calculateTotals]);
 
     // Handle changes in item fields
     const handleItemChange = (

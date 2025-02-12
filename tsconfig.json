@@ -1,19 +1,19 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "strict": true,
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "outDir": "./dist",
-    "baseUrl": "./src",
-    "types": ["node", "react", "react-dom"],
-    "allowJs": true,
-    "resolveJsonModule": true
+    "target": "es6",                           // ES6 is fine for most modern React setups.
+    "module": "commonjs",                      // Use commonjs to work with Node/React.
+    "strict": true,                             // Enable strict type-checking options.
+    "jsx": "react-jsx",                        // Ensures JSX is properly compiled with React 17+ JSX transform.
+    "esModuleInterop": true,                    // Allows default imports of CommonJS modules.
+    "skipLibCheck": true,                       // Skips type checking of declaration files.
+    "forceConsistentCasingInFileNames": true,   // Ensures consistent casing in imports.
+    "moduleResolution": "node",                 // Use Node module resolution for imports.
+    "outDir": "./dist",                         // Directs compiled files to dist folder.
+    "baseUrl": "./src",                         // Resolves module imports relative to the src folder.
+    "types": ["node", "react", "react-dom"],    // Includes type definitions for Node and React.
+    "allowJs": true,                            // Allows mixing JS and TS files in the same project.
+    "resolveJsonModule": true                   // Allows importing JSON modules.
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"],                      // Includes all files in the src directory.
+  "exclude": ["node_modules", "dist"]            // Excludes node_modules and dist from compilation.
 }

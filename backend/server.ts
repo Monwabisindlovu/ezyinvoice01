@@ -10,10 +10,10 @@ const app = express();
 
 // CORS Middleware: Allow requests from frontend
 const corsOptions = {
-  origin: 'http://localhost:3000',  // Allow your React frontend domain
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
-  credentials: true, // Allow credentials (cookies, etc.)
+  origin: '*', // Allow all origins for now
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 };
 
 app.use(cors(corsOptions)); // Applying CORS middleware with options

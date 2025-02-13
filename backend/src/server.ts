@@ -1,42 +1,52 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import authRoutes from './routes/authRoutes'; // Corrected path for authRoutes
+import express, { Request, Response } from "express";
+import cors, { CorsOptions } from "cors";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
 
 const app = express();
 
-// CORS Middleware: Allow requests from frontend
-const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Adjust the URL to your frontend
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
-  credentials: true, // Allow credentials (cookies, etc.)
+const allowedOrigins: string[] = [
+  "http://localhost:3000", // Local development
+  process.env.FRONTEND_URL || "", // Use environment variable for deployed frontend
+];
+
+const corsOptions: CorsOptions = {
+  origin: function (origin: string | undefined, callback: (error: Error | null, success?: boolean) => void) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-app.use(cors(corsOptions)); // Applying CORS middleware with options
+app.use(cors(corsOptions));
 
-// Body parser middleware to parse JSON data
+// Handle preflight requests
+app.options("*", cors(corsOptions));
+
 app.use(express.json());
 
 // Routes
-app.use('/api/auth', authRoutes); // Use the auth routes
+app.use("/api/auth", authRoutes);
 
 // Test route
-app.get('/', (req, res) => {
-  res.send('Hello World!');
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello World!");
 });
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost/ezyinvoice', {
-  // Removed useNewUrlParser and useUnifiedTopology, as they are not required in the latest Mongoose versions
-})
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.log('MongoDB connection error:', err));
+mongoose
+  .connect(process.env.MONGO_URI || "mongodb://localhost/ezyinvoice")
+  .then(() => console.log("MongoDB connected"))
+  .catch((err: unknown) => console.log("MongoDB connection error:", err));
 
-// Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

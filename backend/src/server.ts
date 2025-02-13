@@ -10,7 +10,7 @@ const app = express();
 
 const allowedOrigins: string[] = [
   "http://localhost:3000", // Local development
-  process.env.FRONTEND_URL || "", // Use environment variable for deployed frontend
+  "https://ezyinvoice01.vercel.app", // Deployed frontend (change this if needed)
 ];
 
 const corsOptions: CorsOptions = {

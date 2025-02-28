@@ -267,9 +267,8 @@ useEffect(() => {
                     <View style={styles.companyInfo}>
                         {invoiceData.logo && (
                             <>
-                                {/* eslint-disable jsx-a11y/alt-text */}
+                                {/* eslint-disable-next-line jsx-a11y/alt-text */}
                                 <Image src={invoiceData.logo} style={styles.logo} />
-                                {/* eslint-enable jsx-a11y/alt-text */}
                             </>
                         )}
                         <Text>{invoiceData.from}</Text>
@@ -340,9 +339,8 @@ useEffect(() => {
                 {invoiceData.signature && (
                     <View style={styles.signatureContainer}>
                         <>
-                            {/* eslint-disable jsx-a11y/alt-text */}
-                            <Image src={invoiceData.signature} style={styles.signatureImage} />
-                            {/* eslint-enable jsx-a11y/alt-text */}
+                            {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                          <Image src={invoiceData.signature} style={styles.signatureImage} />
                         </>
                         <Text style={styles.signatureLabel}>Authorized Signature</Text>
                     </View>

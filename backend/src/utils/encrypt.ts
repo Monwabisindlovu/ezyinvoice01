@@ -1,4 +1,5 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';  // Only use bcryptjs, not bcrypt
+
 import crypto from 'crypto';
 
 // Hash password before storing it in the database
@@ -34,4 +35,13 @@ export const decryptData = (encryptedData: string, secretKey: string): string =>
   let decrypted = decipher.update(encrypted, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
   return decrypted;
+};
+
+// Default export containing all functions
+export default {
+  hashPassword,
+  comparePassword,
+  generateRandomToken,
+  encryptData,
+  decryptData,
 };

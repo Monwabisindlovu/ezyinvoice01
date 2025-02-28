@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
+import authService from '../../services/authService';  
 
-const ResetPassword = () => {
-  const [emailOrPhone, setEmailOrPhone] = useState('');
-  const [securityQuestion, setSecurityQuestion] = useState('');
-  const [securityAnswer, setSecurityAnswer] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [verificationMethod, setVerificationMethod] = useState('email'); // 'email' or 'sms'
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const navigate = useNavigate(); // Updated to useNavigate
+
+const ResetPassword: React.FC = () => {
+  const [emailOrPhone, setEmailOrPhone] = useState<string>('');
+  const [verificationCode, setVerificationCode] = useState<string>('');
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const { token } = useParams<string>(); // Extract token from URL params (if exists)
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,26 +20,23 @@ const ResetPassword = () => {
     setError('');
     setSuccessMessage('');
 
-    try {
-      // Validate password
-      if (newPassword !== confirmPassword) {
-        throw new Error('Passwords do not match');
-      }
+    // Ensure passwords match
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      setIsSubmitting(false);
+      return;
+    }
 
-      // Call backend to verify email/phone and reset password
-      const response = await axios.post('/api/auth/reset-password', {
-        emailOrPhone,
-        securityQuestion,
-        securityAnswer,
-        newPassword,
-        verificationMethod,
-      });
+    try {
+      // Handle token-based reset (from URL params) or standard email/phone reset
+      const response = token
+        ? await authService.resetPassword(newPassword, token)
+        : await authService.resetPasswordWithCode(emailOrPhone, verificationCode, newPassword);
 
       if (response.status === 200) {
         setSuccessMessage('Password reset successful. You can now log in with your new password.');
-        // Redirect to login after success
         setTimeout(() => {
-          navigate('/login'); // Updated to use navigate
+          navigate('/login');
         }, 2000);
       }
     } catch (err: any) {
@@ -50,37 +47,44 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="reset-password-container">
-      <h2>Reset Password</h2>
-      {error && <div className="error">{error}</div>}
-      {successMessage && <div className="success">{successMessage}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="input-group">
-          <label htmlFor="emailOrPhone">Email or Phone</label>
-          <input
-            type="text"
-            id="emailOrPhone"
-            value={emailOrPhone}
-            onChange={(e) => setEmailOrPhone(e.target.value)}
-            required
-          />
-        </div>
+    <div className="reset-password-container w-full max-w-sm mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold mb-4">Reset Password</h2>
+      {error && <div className="error text-red-500">{error}</div>}
+      {successMessage && <div className="success text-green-500">{successMessage}</div>}
 
-        {/* Display security question if enabled */}
-        {securityQuestion && (
-          <div className="input-group">
-            <label htmlFor="securityAnswer">{securityQuestion}</label>
+      <form onSubmit={handleSubmit}>
+        {/* Email or Phone Input (if no token) */}
+        {!token && (
+          <div className="input-group mb-4">
+            <label htmlFor="emailOrPhone">Registered Email or Phone</label>
             <input
               type="text"
-              id="securityAnswer"
-              value={securityAnswer}
-              onChange={(e) => setSecurityAnswer(e.target.value)}
+              id="emailOrPhone"
+              value={emailOrPhone}
+              onChange={(e) => setEmailOrPhone(e.target.value)}
               required
+              className="w-full p-2 border border-gray-300 rounded"
             />
           </div>
         )}
 
-        <div className="input-group">
+        {/* Verification Code (if no token) */}
+        {!token && (
+          <div className="input-group mb-4">
+            <label htmlFor="verificationCode">Verification Code</label>
+            <input
+              type="text"
+              id="verificationCode"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              required
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+        )}
+
+        {/* New Password */}
+        <div className="input-group mb-4">
           <label htmlFor="newPassword">New Password</label>
           <input
             type="password"
@@ -92,10 +96,12 @@ const ResetPassword = () => {
             maxLength={12}
             pattern="(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{7,12}"
             title="Password must be 7-12 characters long, and contain at least one letter and one number"
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
-        <div className="input-group">
+        {/* Confirm New Password */}
+        <div className="input-group mb-4">
           <label htmlFor="confirmPassword">Confirm New Password</label>
           <input
             type="password"
@@ -103,10 +109,11 @@ const ResetPassword = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" disabled={isSubmitting} className="w-full bg-blue-500 text-white py-2 rounded">
           {isSubmitting ? 'Resetting...' : 'Reset Password'}
         </button>
       </form>

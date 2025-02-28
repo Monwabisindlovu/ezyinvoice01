@@ -40,8 +40,8 @@ export const verifyGoogleToken = async (token: string): Promise<any> => {
 };
 
 // Function to create a new user in the database
-export const registerUser = async (email: string, password: string): Promise<IUser> => {
-  const hashedPassword = await hashPassword(password);
+export const registerUser = async (email: string, password?: string): Promise<IUser> => {
+  const hashedPassword = password ? await hashPassword(password) : undefined;
   const user = new User({ email, password: hashedPassword });
   return user.save();
 };
@@ -52,23 +52,31 @@ export const findUserByEmail = async (email: string): Promise<IUser | null> => {
 };
 
 // Function to handle user login
-export const loginUser = async (email: string, password: string): Promise<any> => {
-  const user = await findUserByEmail(email);
-  if (!user) {
-    throw new Error('User not found');
-  }
+export const loginUser = async (email: string, password?: string, googleToken?: string): Promise<any> => {
+  let user = await findUserByEmail(email);
+  
+  if (googleToken) {
+    const googlePayload = await verifyGoogleToken(googleToken);
+    if (!user) {
+      user = await registerUser(email);  // Register new user if not found
+    }
+  } else {
+    if (!user) {
+      throw new Error('User not found');
+    }
 
-  const isMatch = await comparePassword(password, user.password);
-  if (!isMatch) {
-    throw new Error('Invalid credentials');
+    const isMatch = await comparePassword(password!, user.password!);
+    if (!isMatch) {
+      throw new Error('Invalid credentials');
+    }
   }
 
   // Explicitly cast _id to ObjectId to avoid type error
   const userId = user._id as Types.ObjectId;
 
   // Create tokens
-  const accessToken = createJwtToken(userId.toString()); // Ensure _id is a string
-  const refreshToken = createRefreshToken(userId.toString()); // Ensure _id is a string
+  const accessToken = createJwtToken(userId.toString());
+  const refreshToken = createRefreshToken(userId.toString());
 
   return { accessToken, refreshToken, user };
 };
@@ -82,7 +90,6 @@ export const verifyRefreshToken = (token: string): any => {
   }
 };
 
-// Export default as an object containing all methods
 const authService = {
   hashPassword,
   comparePassword,

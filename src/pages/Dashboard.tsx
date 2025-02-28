@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InvoiceForm from '../components/Invoice/InvoiceForm';
 import NewInvoiceTemplate from '../components/Invoice01/NewInvoiceTemplate';
@@ -11,6 +11,18 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ isAuthenticated, setIsAuthenticated }) => {
   const [selectedTemplate, setSelectedTemplate] = useState<'template01' | 'template02'>('template01');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Extract token from URL and store in localStorage
+    const queryParams = new URLSearchParams(window.location.search);
+    const token = queryParams.get('token');
+
+    if (token) {
+      localStorage.setItem('jwtToken', token);
+      setIsAuthenticated(true); // Update authentication state
+      window.history.replaceState({}, document.title, '/dashboard'); // Clean URL
+    }
+  }, [setIsAuthenticated]);
 
   const promptLogin = () => {
     alert('Please log in or sign up to use this feature.');

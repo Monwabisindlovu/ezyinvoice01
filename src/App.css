@@ -1,3 +1,4 @@
+/* General App Styles */
 .App {
   text-align: center;
 }
@@ -28,11 +29,66 @@
   color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Gradient animation for Welcome to EzyInvoice */
+@keyframes gradient-animation {
+  0% {
+    background-position: 0%;
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    background-position: 100%;
   }
+  100% {
+    background-position: 0%;
+  }
+}
+
+/* Apply gradient animation */
+.animate-gradient-animation {
+  background-size: 200% 200%;
+  animation: gradient-animation 3s ease infinite;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, #0072ff, #00c6ff, #00ff8c, #6a00ff);
+}
+
+/* Styling for second part with color changing effect */
+@keyframes text-color-change {
+  0% { color: #003366; }  /* Dark Blue */
+  25% { color: #ff6600; } /* Orange */
+  50% { color: #9933cc; } /* Purple */
+  75% { color: #ff007f; } /* Pink */
+  100% { color: #003366; } /* Back to Dark Blue */
+}
+
+.animate-text-fade {
+  animation: text-color-change 5s infinite ease-in-out;
+}
+
+/* Header Text Styles */
+.App-header h1 {
+  font-size: 3rem;
+  font-weight: medium;
+  text-align: center;
+  color: white;
+}
+
+.App-header h2 {
+  font-size: 1.25rem; /* Welcome to EzyInvoice size */
+  font-weight: 600;
+  text-align: center;
+  color: white;
+  display: inline-block;
+  margin: 0;
+}
+
+.App-header h2 span {
+  background-image: linear-gradient(to right, #0072ff, #00c6ff, #00ff8c, #6a00ff);
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradient-animation 3s ease infinite;
+}
+
+.disappearing-text {
+  margin-left: 5px; /* Adds spacing between the two parts */
+  animation: text-color-change 5s infinite ease-in-out;
 }

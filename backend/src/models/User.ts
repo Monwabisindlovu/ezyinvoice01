@@ -1,42 +1,54 @@
-import mongoose, { Schema, Document } from 'mongoose';
+// User model file
+import mongoose, { Schema, Document, Model } from 'mongoose';
+import jwt from 'jsonwebtoken';
 
-export interface IUser extends Document {
-  email?: string;
-  phone?: string;
-  password: string;
-  securityQuestions: Array<{
-    question: string;
-    answer: string;
-  }>;
-  googleId?: string; // Optional for Google OAuth integration
-  createdAt: Date;
-  updatedAt: Date;
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      JWT_SECRET: string;
+    }
+  }
 }
 
-const UserSchema: Schema = new Schema<IUser>(
+export interface IUser extends Document {
+  email: string;
+  password: string;
+  phone?: string;
+  googleId?: string;
+  name?: string;
+  avatar?: string;
+  securityQuestions?: { question: string; answer: string }[];
+  generateJwtToken(): string;
+}
+
+const UserSchema = new Schema<IUser>(
   {
-    email: { type: String, unique: true, sparse: true }, // Unique but sparse to allow NULL values
-    phone: { type: String, unique: true, sparse: true }, // Unique but sparse to allow NULL values
+    email: { type: String, unique: true, required: true },
+    phone: { type: String, unique: true, sparse: true },
     password: { type: String, required: true },
-    securityQuestions: [
-      {
-        question: { type: String, required: true },
-        answer: { type: String, required: true }
-      }
-    ],
-    googleId: { type: String, unique: true, sparse: true }, // Optional for OAuth integration
+    securityQuestions: [{ question: { type: String }, answer: { type: String } }],
+    googleId: { type: String, unique: true },
+    name: { type: String },
+    avatar: { type: String },
   },
   { timestamps: true }
 );
 
-// Create a virtual field for emailOrPhone
-UserSchema.virtual('emailOrPhone').get(function (this: IUser) {
-  return this.email || this.phone;
-});
+// Attach the JWT generation method
+UserSchema.methods.generateJwtToken = function (this: IUser): string {
+  if (!this._id) {
+    throw new Error('User ID is missing for JWT generation');
+  }
+  const payload = { id: this._id.toString(), email: this.email };
+  const secret = process.env.JWT_SECRET || 'default-secret-key';
+  console.log("Generating JWT token for user:", this.email);
+  return jwt.sign(payload, secret, { expiresIn: '1h' });
+};
 
-// Ensure virtuals are included in JSON and object responses
-UserSchema.set('toJSON', { virtuals: true });
-UserSchema.set('toObject', { virtuals: true });
+// Remove any previously compiled model
+if (mongoose.models.User) {
+  delete mongoose.models.User;
+}
 
-const User = mongoose.model<IUser>('User', UserSchema);
+const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema);
 export default User;

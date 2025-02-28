@@ -1,31 +1,15 @@
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import twilio from 'twilio';
 
-// Function to generate an access token
-export const generateAccessToken = (userId: string) => {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '15m' });
-};
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = twilio(accountSid, authToken);
 
-// Function to generate a refresh token
-export const generateRefreshToken = (userId: string) => {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '7d' });
-};
-
-// Function to hash a password
-export const hashPassword = async (password: string) => {
-    const salt = await bcrypt.genSalt(10);
-    return await bcrypt.hash(password, salt);
-};
-
-// Function to compare passwords
-export const comparePassword = async (password: string, hashedPassword: string) => {
-    return await bcrypt.compare(password, hashedPassword);
-};
-
-// Default export containing all functions
-export default {
-    generateAccessToken,
-    generateRefreshToken,
-    hashPassword,
-    comparePassword,
+// Function to send a reset password SMS using Twilio
+export const sendResetSMS = async (phone: string, token: string): Promise<void> => {
+  const message = `Use this token to reset your password: ${token}`;
+  await client.messages.create({
+    body: message,
+    from: process.env.TWILIO_PHONE_NUMBER,
+    to: phone,
+  });
 };

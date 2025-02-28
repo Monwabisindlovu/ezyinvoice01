@@ -132,7 +132,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isAuthenticated, promptLogin 
               />
             }
             fileName={`invoice_${invoiceData.invoiceNumber || Date.now()}.pdf`}
-            className="py-2 shadow-2xl bg-purple-500 text-white rounded-md hover:bg-purple-600 w-full text-center"
+            className="py-2 shadow-2xl bg-gray-800 text-white rounded-md hover:bg-gray-800 w-full text-center"
             onClick={handleGeneratePDF} // Ensure promptLogin is called
           >
             {({ loading }: { loading: boolean }) =>

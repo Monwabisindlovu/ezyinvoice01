@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from 'services/authService';
 import { FcGoogle } from 'react-icons/fc';
@@ -24,6 +24,7 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Validation
     if (!emailOrPhone) {
       setError('Email or phone number is required.');
       return;
@@ -41,19 +42,80 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
 
     try {
       const response = await authService.login(loginData);
-      alert(response.message || 'Login successful!');
-      setError('');
-      setIsAuthenticated(true);
-      localStorage.setItem('isAuthenticated', 'true');
-      navigate('/dashboard');
+
+      if (response.token) {
+        localStorage.setItem('authToken', response.token);
+        localStorage.setItem('isAuthenticated', 'true');
+        setIsAuthenticated(true);
+        navigate('/dashboard');
+      } else {
+        setError('Invalid credentials. Please try again.');
+      }
     } catch (error: any) {
       setError(error.message || 'An unexpected error occurred.');
     }
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = '/api/auth/google';
-  };
+  const handleGoogleLogin = useCallback(async () => {
+    try {
+      const googleToken = await new Promise<string>((resolve, reject) => {
+        window.google.accounts.id.prompt((notification: any) => {
+          if (notification.isNotDisplayed()) {
+            reject('Google login button not displayed');
+          } else if (notification.isSkippedMoment()) {
+            reject('Google login skipped');
+          } else {
+            const grantedScopes = notification.getGrantedScopes();
+            if (grantedScopes) {
+              resolve(grantedScopes);
+            } else {
+              reject('No scopes granted');
+            }
+          }
+        });
+      });
+
+      if (googleToken) {
+        const response = await authService.googleAuth(googleToken);
+        if (response.token) {
+          localStorage.setItem('authToken', response.token);
+          setIsAuthenticated(true);
+          navigate('/dashboard');
+        } else {
+          setError('Google login failed: No token returned.');
+        }
+      }
+    } catch (error) {
+      setError('Google login failed: ' + (error instanceof Error ? error.message : error));
+    }
+  }, [navigate, setIsAuthenticated]);
+
+  useEffect(() => {
+    const initGoogleSignIn = () => {
+      if (window.google && window.google.accounts) {
+        window.google.accounts.id.initialize({
+          client_id: '983836517699-4p2l7t8uuqfd6rrks5teprbioh599d35.apps.googleusercontent.com',
+          callback: handleGoogleLogin,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById('google-login-btn') as HTMLElement,
+          {
+            theme: 'outline',
+            size: 'large',
+          }
+        );
+      }
+    };
+
+    if (window.google) {
+      initGoogleSignIn();
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.onload = initGoogleSignIn;
+      document.body.appendChild(script);
+    }
+  }, [handleGoogleLogin]);
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
@@ -107,12 +169,7 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
         <div className="flex-grow border-t border-gray-300"></div>
       </div>
 
-      <button
-        onClick={handleGoogleLogin}
-        className="w-full bg-red-500 text-white py-2 rounded mt-2 flex items-center justify-center"
-      >
-        <FcGoogle className="mr-2" /> Login with Google
-      </button>
+      <div id="google-login-btn" className="w-full"></div> {/* Google login button container */}
 
       <div className="text-sm text-center mt-4">
         <a href="/forgot-password" className="text-blue-500 hover:underline">

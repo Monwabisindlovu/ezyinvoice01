@@ -22,6 +22,7 @@ const Register = () => {
   const [passwordMatch, setPasswordMatch] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const validateEmail = useCallback((email: string) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -57,12 +58,12 @@ const Register = () => {
     e.preventDefault();
 
     if (!passwordMatch) {
-      alert("Passwords do not match");
+      setErrorMessage("Passwords do not match");
       return;
     }
 
     if (!email && !phone) {
-      alert("Email or phone number is required");
+      setErrorMessage("Email or phone number is required");
       return;
     }
 
@@ -75,12 +76,16 @@ const Register = () => {
       alert("Registration successful");
       navigate('/login'); // Redirect to login page
     } catch (error: any) {
-      alert(error.message);
+      if (error.message.includes("already exists")) {
+        setErrorMessage("User already exists. Please log in or use a different email/phone.");
+      } else {
+        setErrorMessage(error.message || "An error occurred during registration.");
+      }
     }
   };
 
-  const handleGoogleSignup = () => {
-    window.location.href = "/api/auth/google";
+  const googleLogin = async () => {
+    window.location.href = "http://localhost:5000/auth/google"; // Make sure this matches your backend route
   };
 
   return (
@@ -155,6 +160,10 @@ const Register = () => {
           <div className="text-red-500 mb-4">Passwords do not match</div>
         )}
 
+        {errorMessage && (
+          <div className="text-red-500 mb-4">{errorMessage}</div>
+        )}
+
         <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded">
           Sign Up
         </button>
@@ -167,7 +176,7 @@ const Register = () => {
       </div>
 
       <button
-        onClick={handleGoogleSignup}
+        onClick={googleLogin}
         className="w-full bg-red-500 text-white py-2 rounded mt-2 flex items-center justify-center"
       >
         <FcGoogle className="mr-2" /> Sign up with Google
@@ -176,4 +185,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Register; 

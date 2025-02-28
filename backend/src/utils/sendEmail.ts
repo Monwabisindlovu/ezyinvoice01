@@ -1,19 +1,18 @@
-// src/utils/sendEmail.ts
 import nodemailer from 'nodemailer';
 
 // Email configuration (adjust this to your email service provider)
 const transporter = nodemailer.createTransport({
   service: 'gmail',  // Can be any email service like Gmail, SendGrid, etc.
   auth: {
-    user: process.env.EMAIL_USER,  // Use environment variables for sensitive data
-    pass: process.env.EMAIL_PASS,  // Make sure to store this in a secure place
+    user: process.env.SMTP_USER,  // Use environment variables for sensitive data
+    pass: process.env.SMTP_PASS,  // Make sure to store this in a secure place
   },
 });
 
 // Function to send an email
 export const sendEmail = async (to: string, subject: string, text: string, html: string) => {
   const mailOptions = {
-    from: process.env.EMAIL_USER,  // Sender email (use environment variable)
+    from: process.env.SMTP_USER,  // Sender email (use environment variable)
     to,  // Recipient email
     subject,  // Email subject
     text,  // Plain text body
@@ -24,8 +23,10 @@ export const sendEmail = async (to: string, subject: string, text: string, html:
     // Send the email
     const info = await transporter.sendMail(mailOptions);
     console.log('Email sent: ' + info.response);
+    return info;
   } catch (error) {
     console.error('Error sending email: ', error);
+    throw new Error('Email sending failed');  // Provide clear error messaging
   }
 };
 
@@ -40,8 +41,14 @@ export const sendPasswordResetEmail = async (to: string, resetToken: string) => 
     <a href="${resetLink}">Reset Password</a>
   `;
 
-  await sendEmail(to, subject, text, html);
+  try {
+    // Call the sendEmail function to send the reset email
+    await sendEmail(to, subject, text, html);
+  } catch (error) {
+    console.error('Error sending password reset email: ', error);
+    throw new Error('Password reset email failed');
+  }
 };
 
-// Add a default export for sendPasswordResetEmail
+// Default export containing all functions
 export default sendPasswordResetEmail;

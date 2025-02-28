@@ -1,30 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface TotalsSectionProps {
     items: { quantity: number; rate: number; amount: number }[];
     currencySymbol: string;
-    subtotal: number; // Added subtotal prop
-    vat: number;      // Added vat prop
-    total: number;    // Added total prop
-    amountPaid: number; // Added amountPaid prop
+    subtotal: number;
+    vat: number;
+    total: number;
+    amountPaid: number;
+    onDiscountChange: (discountPercent: string) => void;
+    onShippingChange: (shipping: string) => void;
+    onTaxChange: (taxName: string, taxPercent: string) => void;
+    taxList: { name: string; percent: number; amount: number }[];
+    onRemoveTax: (index: number) => void;
 }
 
-const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, subtotal, vat, total, amountPaid }) => {
+const TotalsSection: React.FC<TotalsSectionProps> = ({
+    items,
+    currencySymbol,
+    subtotal,
+    vat,
+    total,
+    amountPaid,
+    onDiscountChange,
+    onShippingChange,
+    onTaxChange,
+    taxList,
+    onRemoveTax
+}) => {
     const [discountPercent, setDiscountPercent] = useState('');
     const [shipping, setShipping] = useState('');
     const [amountPaidInput, setAmountPaidInput] = useState(amountPaid);
 
     const [taxName, setTaxName] = useState('');
     const [taxPercent, setTaxPercent] = useState('');
-    const [taxList, setTaxList] = useState<{ name: string; percent: number; amount: number }[]>([]);
     const [activeInput, setActiveInput] = useState<string | null>(null);
 
-    // Calculate Subtotal (if it's calculated locally here)
+    useEffect(() => {
+        // Update parent component with discount and shipping
+        onDiscountChange(discountPercent);
+        onShippingChange(shipping);
+    }, [discountPercent, shipping, onDiscountChange, onShippingChange]);
+
     const calculateSubtotal = () => {
         return items.reduce((acc, item) => acc + item.amount, 0).toFixed(2);
     };
 
-    // Calculate Total
     const calculateTotal = () => {
         const subtotalAmount = parseFloat(calculateSubtotal());
         const totalTax = taxList.reduce((acc, taxItem) => acc + taxItem.amount, 0);
@@ -34,34 +54,20 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, su
         return totalAmount.toFixed(2);
     };
 
-    // Calculate Due Balance
-    const calculateDueBalance = () => {
-        const totalAmount = parseFloat(calculateTotal());
-        return (totalAmount - amountPaidInput).toFixed(2);
-    };
-
-    // Handle adding tax to the list
     const handleAddTax = () => {
         const parsedTaxPercent = parseFloat(taxPercent);
-        const taxAmount = (parseFloat(calculateSubtotal()) * parsedTaxPercent) / 100;
-
         if (taxName && !isNaN(parsedTaxPercent)) {
-            setTaxList([...taxList, { name: taxName, percent: parsedTaxPercent, amount: taxAmount }]);
+            onTaxChange(taxName, taxPercent);
             setTaxName('');
             setTaxPercent('');
             setActiveInput(null);
         }
     };
 
-    // Handle removing tax from the list
-    const handleRemoveTax = (index: number) => {
-        setTaxList(taxList.filter((_, i) => i !== index));
-    };
-
     // Handle adding shipping
     const handleAddShipping = () => {
         const shippingAmount = parseFloat(shipping);
-        if (!isNaN(shippingAmount) && shippingAmount > 0) {
+        if (!isNaN(shippingAmount) && shippingAmount >= 0) {
             setShipping(shippingAmount.toString());
             setActiveInput(null);
         }
@@ -69,8 +75,8 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, su
 
     // Handle adding discount
     const handleAddDiscount = () => {
-        const discountAmount = (parseFloat(discountPercent) * parseFloat(calculateSubtotal())) / 100;
-        if (discountPercent && !isNaN(discountAmount)) {
+        const discountAmount = parseFloat(discountPercent);
+        if (!isNaN(discountAmount) && discountAmount >= 0 && discountAmount <= 100) {
             setDiscountPercent(discountPercent);
             setActiveInput(null);
         }
@@ -91,12 +97,12 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, su
             {/* Subtotal Section */}
             <div className="flex items-center justify-between mb-1">
                 <span className="text-xs">Subtotal</span>
-                <span className="text-xs">{`${currencySymbol}${subtotal.toFixed(2)}`}</span> {/* Used subtotal prop */}
+                <span className="text-xs">{currencySymbol}{parseFloat(calculateSubtotal()).toFixed(2)}</span>
             </div>
 
             {/* Action Buttons */}
             <div className="flex justify-start space-x-4 mb-2">
-                {!activeInput && !taxList.length && (
+                {!activeInput && taxList.length === 0 && (
                     <button
                         onClick={() => setActiveInput('tax')}
                         className="bg-green-500 text-white rounded-full p-0.5 text-xs"
@@ -139,7 +145,7 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, su
                         +
                     </button>
                     <button
-                        onClick={handleRemoveDiscount}
+                        onClick={() => setActiveInput(null)}
                         className="absolute right-0 bg-red-500 text-white rounded-md p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                         Remove
@@ -194,7 +200,7 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, su
                         +
                     </button>
                     <button
-                        onClick={handleRemoveShipping}
+                        onClick={() => setActiveInput(null)}
                         className="absolute right-0 bg-red-500 text-white rounded-md p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                         Remove
@@ -205,10 +211,10 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, su
             {/* Tax List Display */}
             {taxList.map((taxItem, index) => (
                 <div key={index} className="flex items-center justify-between mb-1 relative group">
-                    <span className="text-xs">{`${taxItem.name} (${taxItem.percent}%)`}</span>
-                    <span className="text-xs">{`${currencySymbol}${taxItem.amount.toFixed(2)}`}</span>
+                    <span className="text-xs">{taxItem.name} ({taxItem.percent}%)</span>
+                    <span className="text-xs">{currencySymbol}{(parseFloat(calculateSubtotal()) * taxItem.percent / 100).toFixed(2)}</span>
                     <button
-                        onClick={() => handleRemoveTax(index)}
+                        onClick={() => onRemoveTax(index)}
                         className="absolute right-0 bg-red-500 text-white rounded-md p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                         Remove
@@ -220,7 +226,7 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, su
             {discountPercent && (
                 <div className="flex items-center justify-between mb-1 relative group">
                     <span className="text-xs">Discount {discountPercent}%</span>
-                    <span className="text-xs">{`-${currencySymbol}${(parseFloat(discountPercent) * parseFloat(calculateSubtotal()) / 100).toFixed(2)}`}</span>
+                    <span className="text-xs">-{currencySymbol}{(parseFloat(discountPercent) * parseFloat(calculateSubtotal()) / 100).toFixed(2)}</span>
                     <button
                         onClick={handleRemoveDiscount}
                         className="absolute right-0 bg-red-500 text-white rounded-md p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
@@ -234,7 +240,7 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, su
             {shipping && (
                 <div className="flex items-center justify-between mb-1 relative group">
                     <span className="text-xs">Shipping</span>
-                    <span className="text-xs">{`${currencySymbol}${parseFloat(shipping).toFixed(2)}`}</span>
+                    <span className="text-xs">{currencySymbol}{parseFloat(shipping).toFixed(2)}</span>
                     <button
                         onClick={handleRemoveShipping}
                         className="absolute right-0 bg-red-500 text-white rounded-md p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
@@ -247,7 +253,7 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, su
             {/* Total Section */}
             <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-bold">Total</span>
-                <span className="text-xs">{`${currencySymbol}${total.toFixed(2)}`}</span> {/* Used total prop */}
+                <span className="text-xs">{currencySymbol}{calculateTotal()}</span>
             </div>
 
             {/* Amount Paid */}
@@ -265,7 +271,7 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({ items, currencySymbol, su
             {/* Due Balance */}
             <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-bold">Due Balance</span>
-                <span className="text-xs">{`${currencySymbol}${calculateDueBalance()}`}</span>
+                <span className="text-xs">{currencySymbol}{(parseFloat(calculateTotal()) - amountPaidInput).toFixed(2)}</span>
             </div>
         </div>
     );

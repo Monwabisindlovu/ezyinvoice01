@@ -2,35 +2,52 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 
+// Extend Express Request type to include user
 declare module 'express' {
   interface Request {
-    user?: any;
+    user?: any; // Define a more specific type based on your user model
   }
 }
 
-export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+/**
+ * Middleware to authenticate JWT
+ */
+export const authenticateJWT = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const token = req.headers.authorization?.split(' ')[1]; // Extract token
+
+  if (!token) {
+    res.status(401).json({ message: 'Unauthorized: No token provided' });
+    return; // ✅ Simply return instead of casting to void
+  }
+
   try {
-    const token = req.header('Authorization')?.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string }; // Verify token and extract userId
+    const user = await User.findById(decoded.userId).select('-password'); // Select user excluding password
 
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-    const user = await User.findById(decoded.id);
-    if (!user) return res.status(401).json({ message: 'Invalid token.' });
+    if (!user) {
+      res.status(401).json({ message: 'Unauthorized: User not found' });
+      return; // ✅ Just return instead of casting to void
+    }
 
-    req.user = user;
-    next();
+    req.user = user; // Attach user to request object
+    next(); // Move to the next middleware
   } catch (error) {
-    res.status(401).json({ message: 'Invalid or expired token.', error });
+    res.status(403).json({ message: 'Forbidden: Invalid token' });
+    return; // ✅ Simply return instead of casting to void
   }
 };
 
+/**
+ * Middleware to authorize user roles
+ */
 export const authorizeRoles = (...roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
+      res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
+      return; // ✅ Simply return instead of casting to void
     }
-    next();
+    next(); // Continue if authorized
   };
 };
 
-export default { authenticate, authorizeRoles };
+export default { authenticateJWT, authorizeRoles };

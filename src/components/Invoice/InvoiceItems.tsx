@@ -69,7 +69,7 @@ const InvoiceItems: React.FC<InvoiceItemsProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => onOpenTaxModal(index)}
-                                    className="px-4 py-2 bg-blue-800 text-white rounded-md hover:bg-blue-900"
+                                    className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-800"
                                 >
                                     {item.taxName ? `${item.taxName} ${item.taxPercentage}%` : 'Add Tax'}
                                 </button>
@@ -93,7 +93,7 @@ const InvoiceItems: React.FC<InvoiceItemsProps> = ({
             <div className="flex flex-col space-y-4 flex-1">
                 <button
                     onClick={onAddNewItem}
-                    className="py-2 bg-blue-800 text-white rounded-md hover:bg-blue-900 w-full"
+                    className="py-2 bg-gray-800 text-white rounded-md hover:bg-gray-800 w-full"
                 >
                     Add New Item
                 </button>

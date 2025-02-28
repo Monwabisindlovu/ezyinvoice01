@@ -251,10 +251,13 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
         return null;
     };
 
-    // Logs for debugging
-    useEffect(() => {
+   // Logs for debugging
+useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
         console.log("Invoice Data before rendering:", invoiceData);
-    }, [invoiceData]);
+    }
+}, [invoiceData]);
 
     return (
         <Document>
@@ -263,7 +266,11 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                 <View style={styles.header}>
                     <View style={styles.companyInfo}>
                         {invoiceData.logo && (
-                            <Image src={invoiceData.logo} style={styles.logo} />
+                            <>
+                                {/* eslint-disable jsx-a11y/alt-text */}
+                                <Image src={invoiceData.logo} style={styles.logo} />
+                                {/* eslint-enable jsx-a11y/alt-text */}
+                            </>
                         )}
                         <Text>{invoiceData.from}</Text>
                     </View>
@@ -332,7 +339,11 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                 {/* Signature Section */}
                 {invoiceData.signature && (
                     <View style={styles.signatureContainer}>
-                        <Image src={invoiceData.signature} style={styles.signatureImage} />
+                        <>
+                            {/* eslint-disable jsx-a11y/alt-text */}
+                            <Image src={invoiceData.signature} style={styles.signatureImage} />
+                            {/* eslint-enable jsx-a11y/alt-text */}
+                        </>
                         <Text style={styles.signatureLabel}>Authorized Signature</Text>
                     </View>
                 )}

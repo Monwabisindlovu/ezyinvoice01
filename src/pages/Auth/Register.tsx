@@ -85,8 +85,10 @@ const Register = () => {
   };
 
   const googleLogin = async () => {
-    window.location.href = "http://localhost:5000/auth/google"; // Make sure this matches your backend route
+    const googleLoginURL = `${process.env.REACT_APP_API_URL}/auth/google`;
+    window.location.href = googleLoginURL;
   };
+  
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">

@@ -1,11 +1,11 @@
 {
-  "short_name": "Ezyinvoice01",
-  "name": "Create React App Sample",
+  "short_name": "EzyInvoice",
+  "name": "EzyInvoice App",
   "icons": [
     {
-      "src": "logo192.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "/logo1.png",
+      "type": "image/png",
+      "sizes": "192x192"
     }
   ],
   "start_url": ".",

@@ -3,7 +3,7 @@ import React from 'react';
 const About: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto py-10 px-6 text-gray-800">
-      <h1 className="text-4xl font-extrabold text-center mb-6 text-blue-600">About EzyInvoice01</h1>
+      <h1 className="text-4xl font-extrabold text-center mb-6 text-blue-600">About EzyInvoice</h1>
 
       <p className="text-lg mb-6 text-center">
         <strong>Your All-in-One Solution for Effortless Invoice Management</strong>  
@@ -26,7 +26,7 @@ const About: React.FC = () => {
         Your contributions have been invaluable in shaping EzyInvoice01 into what it is today.
       </p>
 
-      <h2 className="text-2xl font-semibold mt-6 mb-4 text-blue-500">Why Choose EzyInvoice01?</h2>
+      <h2 className="text-2xl font-semibold mt-6 mb-4 text-blue-500">Why Choose EzyInvoice?</h2>
       <ul className="list-disc list-inside text-lg mb-6">
         <li><span className="font-bold">Fast & Intuitive:</span> Create invoices in seconds with an easy-to-use interface.</li>
         <li><span className="font-bold">Secure & Reliable:</span> Your data is safely stored and always accessible.</li>

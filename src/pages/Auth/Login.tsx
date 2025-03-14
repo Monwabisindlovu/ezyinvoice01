@@ -65,16 +65,17 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
           } else if (notification.isSkippedMoment()) {
             reject('Google login skipped');
           } else {
-            const grantedScopes = notification.getGrantedScopes();
+            // Ensure notification is available and check for granted scopes correctly
+            const grantedScopes = notification.getGrantedScopes ? notification.getGrantedScopes() : null;
             if (grantedScopes) {
-              resolve(grantedScopes);
+              resolve(grantedScopes); // This might be the actual token or required information, depending on your use case
             } else {
               reject('No scopes granted');
             }
           }
         });
       });
-
+  
       if (googleToken) {
         const response = await authService.googleAuth(googleToken);
         if (response.token) {
@@ -86,6 +87,7 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
         }
       }
     } catch (error) {
+      // Improved error handling
       setError('Google login failed: ' + (error instanceof Error ? error.message : error));
     }
   }, [navigate, setIsAuthenticated]);

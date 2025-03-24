@@ -228,77 +228,77 @@ const NewInvoiceTemplate: React.FC = () => {
             </div>
 
             <NewInvoiceItems
-                items={items}
-                currency={currency}
-                onItemChange={handleItemChange}
-                onRemoveItem={removeItem}
-                onAddNewItem={addItem}
-            />
-
-            <div className="flex justify-between mt-6 mb-4">
-                <div className="flex flex-col w-full sm:w-2/5">
-                    <div className="flex-grow" style={{ height: 'calc(100% - 130px)' }}>
-                        <NotesSection
-                            notesHeader={notesHeader}
-                            notesContent={notesContent}
-                            termsContent={termsContent}
-                            onNotesHeaderChange={setNotesHeader}
-                            onNotesContentChange={setNotesContent}
-                            onTermsContentChange={setTermsContent}
-                        />
-                    </div>
-                </div>
-
-                <div className="flex flex-col w-full sm:w-1/3">
-                    <div className="flex items-center justify-between mb-1">
-                        <CurrencySelector
-                            selectedCurrency={currency.code}
-                            onCurrencyChange={handleCurrencyChange}
-                            className="text-xs"
-                        />
-                    </div>
-
-                    <div className="flex flex-col justify-between flex-grow">
-                        <TotalsSection
                             items={items}
-                            currencySymbol={currencySymbol}
-                            subtotal={subtotal}
-                            vat={totalTaxAmount}
-                            total={total}
-                            amountPaid={0}
-                            onDiscountChange={handleDiscountChange}
-                            onShippingChange={handleShippingChange}
-                            onTaxChange={handleTaxChange}
-                            taxList={taxList}
-                            onRemoveTax={handleRemoveTax}
+                            currency={currency}
+                            onItemChange={handleItemChange}
+                            onRemoveItem={removeItem}
+                            onAddNewItem={addItem}
                         />
+            
+                        <div className="flex justify-between mt-6 mb-4">
+                            <div className="flex flex-col w-full sm:w-2/5">
+                                <div className="flex-grow" style={{ height: 'calc(100% - 130px)' }}>
+                                    <NotesSection
+                                        notesHeader={notesHeader}
+                                        notesContent={notesContent}
+                                        termsContent={termsContent}
+                                        onNotesHeaderChange={setNotesHeader}
+                                        onNotesContentChange={setNotesContent}
+                                        onTermsContentChange={setTermsContent}
+                                    />
+                                </div>
+                            </div>
+            
+                            <div className="flex flex-col w-full sm:w-1/3">
+                                <div className="flex items-center justify-between mb-1">
+                                    <CurrencySelector
+                                        selectedCurrency={currency.code}
+                                        onCurrencyChange={handleCurrencyChange}
+                                        className="text-xs"
+                                    />
+                                </div>
+            
+                                <div className="flex flex-col justify-between flex-grow">
+                                    <TotalsSection
+                                        items={items}
+                                        currencySymbol={currencySymbol}
+                                        subtotal={subtotal}
+                                        vat={totalTaxAmount}
+                                        total={total}
+                                        amountPaid={0}
+                                        onDiscountChange={handleDiscountChange}
+                                        onShippingChange={handleShippingChange}
+                                        onTaxChange={handleTaxChange}
+                                        taxList={taxList}
+                                        onRemoveTax={handleRemoveTax}
+                                    />
+                                </div>
+            
+                                <div className="mt-6 flex flex-col justify-end flex-shrink-0">
+                                    <h3 className="text-xs font-semibold mb-1">Signature</h3>
+                                    <ImageUploader
+                                        image={signature ? URL.createObjectURL(signature) : null}
+                                        onChange={handleSignatureChange}
+                                        className="h-14,9 w-auto"
+                                        label=""
+                                    />
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div className="my-4 max-w-4xl justify-center flex mx-auto">
+                            <PDFDownloadLink
+                                document={<NewInvoiceDocument invoiceData={invoiceData} />}
+                                fileName={`invoice_${invoiceData.invoiceNumber || Date.now()}.pdf`}
+                                className="py-2 shadow-2xl bg-gray-800 text-white rounded-md hover:bg-gray-800 w-full text-center"
+                            >
+                                {({ loading }: { loading: boolean }) =>
+                                    loading ? 'Generating PDF...' : 'Generate PDF'
+                                }
+                            </PDFDownloadLink>
+                        </div>
                     </div>
-
-                    <div className="mt-6 flex flex-col justify-end flex-shrink-0">
-                        <h3 className="text-xs font-semibold mb-1">Signature</h3>
-                        <ImageUploader
-                            image={signature ? URL.createObjectURL(signature) : null}
-                            onChange={handleSignatureChange}
-                            className="h-14 w-auto"
-                            label=""
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div className="my-4 max-w-4xl justify-center flex mx-auto">
-                <PDFDownloadLink
-                    document={<NewInvoiceDocument invoiceData={invoiceData} />}
-                    fileName={`invoice_${invoiceData.invoiceNumber || Date.now()}.pdf`}
-                    className="py-2 shadow-2xl bg-gray-800 text-white rounded-md hover:bg-gray-800 w-full text-center"
-                >
-                    {({ loading }: { loading: boolean }) =>
-                        loading ? 'Generating PDF...' : 'Generate PDF'
-                    }
-                </PDFDownloadLink>
-            </div>
-        </div>
-    );
-};
-
-export default NewInvoiceTemplate;
+                );
+            };
+            
+            export default NewInvoiceTemplate;

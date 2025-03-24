@@ -256,18 +256,20 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({
                 <span className="text-xs">{currencySymbol}{calculateTotal()}</span>
             </div>
 
-            {/* Amount Paid */}
-            <div className="flex items-center justify-between mb-1">
-                <span className="text-xs">Amount Paid</span>
-                <input
-                    type="number"
-                    value={amountPaidInput}
-                    onChange={(e) => setAmountPaidInput(parseFloat(e.target.value))}
-                    placeholder="Amount Paid"
-                    className="border rounded-md p-0.5 w-1/2 text-xs"
-                />
-            </div>
+            {/* Amount Paid Display - Matches Subtotal, Total, and Due Balance */}
+<div className="flex items-center justify-between mb-1">
+    <span className="text-xs font-bold">Amount Paid</span>
+    <span className="text-xs">{currencySymbol}{amountPaidInput.toFixed(2)}</span>
+</div>
 
+{/* Editable Input Field (Optional) - Place it separately if needed */}
+<input
+    type="number"
+    value={amountPaidInput}
+    onChange={(e) => setAmountPaidInput(parseFloat(e.target.value))}
+    placeholder="Enter Amount Paid"
+    className="border rounded-md p-0.5 w-full text-xs mt-2"
+/>
             {/* Due Balance */}
             <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-bold">Due Balance</span>

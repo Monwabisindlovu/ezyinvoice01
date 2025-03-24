@@ -214,7 +214,6 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
         total -= calculateDiscountAmount();
         total += parseFloat(shipping ?? '0') || 0;
 
-
         return total;
     };
 
@@ -251,13 +250,16 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
         return null;
     };
 
-   // Logs for debugging
-useEffect(() => {
-    if (process.env.NODE_ENV !== "production") {
-        // eslint-disable-next-line no-console
-        console.log("Invoice Data before rendering:", invoiceData);
-    }
-}, [invoiceData]);
+    // Calculate due balance only if amountPaid > 0
+    const dueBalance = calculateTotal() - invoiceData.amountPaid;
+
+    // Logs for debugging
+    useEffect(() => {
+        if (process.env.NODE_ENV !== "production") {
+            // eslint-disable-next-line no-console
+            console.log("Invoice Data before rendering:", invoiceData);
+        }
+    }, [invoiceData]);
 
     return (
         <Document>
@@ -311,10 +313,10 @@ useEffect(() => {
                             <Text style={[styles.tableCol, { width: '50%' }]}>{item.description}</Text>
                             <Text style={[styles.tableCol, { width: '10%' }]}>{item.quantity}</Text>
                             <Text style={[styles.tableCol, { width: '20%', textAlign: 'right' }]}>
-                                {formatCurrencySafe(item.rate, currencySymbol || "$")} {/* Safe fallback */}
+                                {formatCurrencySafe(item.rate, currencySymbol || "$")}
                             </Text>
                             <Text style={[styles.tableCol, { width: '20%', textAlign: 'right' }]}>
-                                {formatCurrencySafe(item.amount, currencySymbol || "$")} {/* Safe fallback */}
+                                {formatCurrencySafe(item.amount, currencySymbol || "$")}
                             </Text>
                         </View>
                     ))}
@@ -324,15 +326,27 @@ useEffect(() => {
                 <View style={styles.totals}>
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Subtotal:</Text>
-                        <Text>{formatCurrencySafe(invoiceData.subtotal, currencySymbol || "$")}</Text> {/* Safeguarding currencySymbol */}
+                        <Text>{formatCurrencySafe(invoiceData.subtotal, currencySymbol || "$")}</Text>
                     </View>
                     {renderTaxDetails()}
                     {renderDiscountDetails()}
                     {renderShippingDetails()}
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Total:</Text>
-                        <Text style={styles.totalValue}>{formatCurrencySafe(calculateTotal(), currencySymbol || "$")}</Text> {/* Safeguarding currencySymbol */}
+                        <Text style={styles.totalValue}>{formatCurrencySafe(calculateTotal(), currencySymbol || "$")}</Text>
                     </View>
+                    {invoiceData.amountPaid > 0 && (
+                        <>
+                            <View style={styles.totalRow}>
+                                <Text style={styles.totalLabel}>Amount Paid:</Text>
+                                <Text>{formatCurrencySafe(invoiceData.amountPaid, currencySymbol || "$")}</Text>
+                            </View>
+                            <View style={styles.totalRow}>
+                                <Text style={styles.totalLabel}>Due Balance:</Text>
+                                <Text>{formatCurrencySafe(dueBalance, currencySymbol || "$")}</Text>
+                            </View>
+                        </>
+                    )}
                 </View>
 
                 {/* Signature Section */}
@@ -340,7 +354,7 @@ useEffect(() => {
                     <View style={styles.signatureContainer}>
                         <>
                             {/* eslint-disable-next-line jsx-a11y/alt-text */}
-                          <Image src={invoiceData.signature} style={styles.signatureImage} />
+                            <Image src={invoiceData.signature} style={styles.signatureImage} />
                         </>
                         <Text style={styles.signatureLabel}>Authorized Signature</Text>
                     </View>

@@ -286,7 +286,7 @@ const NewInvoiceTemplate: React.FC = () => {
                             </div>
                         </div>
             
-                        <div className="my-4 max-w-4xl justify-center flex mx-auto">
+                        <div className="my-4 max-w-4xl justify-center flex mx-auto w-full">
                             <PDFDownloadLink
                                 document={<NewInvoiceDocument invoiceData={invoiceData} />}
                                 fileName={`invoice_${invoiceData.invoiceNumber || Date.now()}.pdf`}

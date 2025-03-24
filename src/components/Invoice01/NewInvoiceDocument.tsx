@@ -170,10 +170,10 @@ interface InvoiceData {
     total: number;
     notesHeader?: string;
     notesContent?: {
-        accountName?: string;
-        bankName?: string;
-        branchCode?: string;
-        accountNumber?: string;
+        accountName: string;
+        bankName: string;
+        branchCode: string;
+        accountNumber: string;
     };
     termsContent?: string;
     amountPaid: number;
@@ -190,15 +190,8 @@ interface InvoiceDocumentProps {
 const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => {
     const { currencySymbol, discountPercent, shipping, taxList } = invoiceData;
 
-    // Helper function to capitalize first letter of each word
-    const capitalizeWords = (str: string) =>
-        str
-            .split(' ')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-
     const formatCurrencySafe = (value: number, symbol?: string) => {
-        return formatCurrency(value, symbol || "$");
+        return formatCurrency(value, symbol || "$"); // Provide default currency symbol if undefined
     };
 
     const calculateTaxAmount = (subtotal: number, taxPercent: number) => {
@@ -220,6 +213,7 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
 
         total -= calculateDiscountAmount();
         total += parseFloat(shipping ?? '0') || 0;
+
 
         return total;
     };
@@ -257,20 +251,13 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
         return null;
     };
 
-    // Determine if any bank details are present
-    const bankDataPresent = invoiceData.notesContent && (
-        invoiceData.notesContent.accountName ||
-        invoiceData.notesContent.bankName ||
-        invoiceData.notesContent.branchCode ||
-        invoiceData.notesContent.accountNumber
-    );
-
-    useEffect(() => {
-        // Removed console.log for production build
-        // if (process.env.NODE_ENV !== "production") {
-        //     console.log("Invoice Data before rendering:", invoiceData);
-        // }
-    }, [invoiceData]);
+   // Logs for debugging
+useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.log("Invoice Data before rendering:", invoiceData);
+    }
+}, [invoiceData]);
 
     return (
         <Document>
@@ -279,7 +266,10 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                 <View style={styles.header}>
                     <View style={styles.companyInfo}>
                         {invoiceData.logo && (
-                            <Image src={invoiceData.logo} style={styles.logo} alt="Company Logo" />
+                            <>
+                                {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                                <Image src={invoiceData.logo} style={styles.logo} />
+                            </>
                         )}
                         <Text>{invoiceData.from}</Text>
                     </View>
@@ -321,10 +311,10 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                             <Text style={[styles.tableCol, { width: '50%' }]}>{item.description}</Text>
                             <Text style={[styles.tableCol, { width: '10%' }]}>{item.quantity}</Text>
                             <Text style={[styles.tableCol, { width: '20%', textAlign: 'right' }]}>
-                                {formatCurrencySafe(item.rate, currencySymbol || "$")}
+                                {formatCurrencySafe(item.rate, currencySymbol || "$")} {/* Safe fallback */}
                             </Text>
                             <Text style={[styles.tableCol, { width: '20%', textAlign: 'right' }]}>
-                                {formatCurrencySafe(item.amount, currencySymbol || "$")}
+                                {formatCurrencySafe(item.amount, currencySymbol || "$")} {/* Safe fallback */}
                             </Text>
                         </View>
                     ))}
@@ -334,33 +324,24 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                 <View style={styles.totals}>
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Subtotal:</Text>
-                        <Text>{formatCurrencySafe(invoiceData.subtotal, currencySymbol || "$")}</Text>
+                        <Text>{formatCurrencySafe(invoiceData.subtotal, currencySymbol || "$")}</Text> {/* Safeguarding currencySymbol */}
                     </View>
                     {renderTaxDetails()}
                     {renderDiscountDetails()}
                     {renderShippingDetails()}
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Total:</Text>
-                        <Text style={styles.totalValue}>{formatCurrencySafe(calculateTotal(), currencySymbol || "$")}</Text>
+                        <Text style={styles.totalValue}>{formatCurrencySafe(calculateTotal(), currencySymbol || "$")}</Text> {/* Safeguarding currencySymbol */}
                     </View>
-                    {invoiceData.amountPaid > 0 && (
-                        <>
-                            <View style={styles.totalRow}>
-                                <Text style={styles.totalLabel}>Amount Paid:</Text>
-                                <Text>{formatCurrencySafe(invoiceData.amountPaid, currencySymbol || "$")}</Text>
-                            </View>
-                            <View style={styles.totalRow}>
-                                <Text style={styles.totalLabel}>Due Balance:</Text>
-                                <Text>{formatCurrencySafe(calculateTotal() - invoiceData.amountPaid, currencySymbol || "$")}</Text>
-                            </View>
-                        </>
-                    )}
                 </View>
 
                 {/* Signature Section */}
                 {invoiceData.signature && (
                     <View style={styles.signatureContainer}>
-                        <Image src={invoiceData.signature} style={styles.signatureImage} alt="Authorized Signature" />
+                        <>
+                            {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                          <Image src={invoiceData.signature} style={styles.signatureImage} />
+                        </>
                         <Text style={styles.signatureLabel}>Authorized Signature</Text>
                     </View>
                 )}
@@ -368,45 +349,48 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                 {/* Notes and Terms */}
                 {(invoiceData.notesContent || invoiceData.termsContent) && (
                     <View style={styles.terms}>
-                        {bankDataPresent && (
+                        {/* Bank Details Section */}
+                        {invoiceData.notesContent && (
                             <View style={styles.bankDetailsSection}>
                                 <Text style={[styles.doubleDottedHeader]}>Bank Details</Text>
                                 <View style={{ marginLeft: 10 }}>
-                                    {invoiceData.notesContent?.accountName && (
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-                                            <Text style={styles.bankDetailLabel}>Account Name:</Text>
-                                            <Text style={styles.dottedUnderline}>
-                                                {capitalizeWords(invoiceData.notesContent.accountName)}
-                                            </Text>
-                                        </View>
-                                    )}
-                                    {invoiceData.notesContent?.bankName && (
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-                                            <Text style={styles.bankDetailLabel}>Bank Name:</Text>
-                                            <Text style={styles.dottedUnderline}>
-                                                {capitalizeWords(invoiceData.notesContent.bankName)}
-                                            </Text>
-                                        </View>
-                                    )}
-                                    {invoiceData.notesContent?.branchCode && (
+                                    {/* Account Name */}
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+                                        <Text style={styles.bankDetailLabel}>Account Name:</Text>
+                                        <Text style={styles.dottedUnderline}>
+                                            {invoiceData.notesContent.accountName || 'N/A'}
+                                        </Text>
+                                    </View>
+
+                                    {/* Bank Name */}
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+                                        <Text style={styles.bankDetailLabel}>Bank Name:</Text>
+                                        <Text style={styles.dottedUnderline}>
+                                            {invoiceData.notesContent.bankName || 'N/A'}
+                                        </Text>
+                                    </View>
+
+                                    {/* Branch Code */}
+                                    {invoiceData.notesContent.branchCode && (
                                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
                                             <Text style={styles.bankDetailLabel}>Branch Code:</Text>
                                             <Text style={styles.dottedUnderline}>
-                                                {capitalizeWords(invoiceData.notesContent.branchCode)}
+                                                {invoiceData.notesContent.branchCode}
                                             </Text>
                                         </View>
                                     )}
-                                    {invoiceData.notesContent?.accountNumber && (
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-                                            <Text style={styles.bankDetailLabel}>Account Number:</Text>
-                                            <Text style={styles.dottedUnderline}>
-                                                {capitalizeWords(invoiceData.notesContent.accountNumber)}
-                                            </Text>
-                                        </View>
-                                    )}
+
+                                    {/* Account Number */}
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+                                        <Text style={styles.bankDetailLabel}>Account Number:</Text>
+                                        <Text style={styles.dottedUnderline}>
+                                            {invoiceData.notesContent.accountNumber || 'N/A'}
+                                        </Text>
+                                    </View>
                                 </View>
                             </View>
                         )}
+                        {/* Conditional rendering for Terms and Conditions */}
                         {invoiceData.termsContent && (
                             <View style={{ marginTop: 20 }}>
                                 <Text style={[styles.doubleDottedHeader]}>Terms and Conditions</Text>

@@ -257,19 +257,26 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({
             </div>
 
             {/* Amount Paid Display - Matches Subtotal, Total, and Due Balance */}
-<div className="flex items-center justify-between mb-1">
+<div className="flex items-center justify-between mb-1 relative">
     <span className="text-xs font-bold">Amount Paid</span>
-    <span className="text-xs">{currencySymbol}{amountPaidInput.toFixed(2)}</span>
+    <div className="relative w-1/2">
+        <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-xs">
+            {currencySymbol}
+        </span>
+        <input
+            type="number"
+            placeholder="0.00"
+            value={amountPaidInput !== null && !isNaN(amountPaidInput) ? amountPaidInput : ''}
+            onChange={(e) => {
+                const value = e.target.value.trim();
+                setAmountPaidInput(value === '' ? 0 : parseFloat(value));
+            }}
+            className="border rounded-md p-0.5 w-full text-xs pl-6"
+            style={{ height: '34px' }}
+        />
+    </div>
 </div>
 
-{/* Editable Input Field (Optional) - Place it separately if needed */}
-<input
-    type="number"
-    value={amountPaidInput}
-    onChange={(e) => setAmountPaidInput(parseFloat(e.target.value))}
-    placeholder="Enter Amount Paid"
-    className="border rounded-md p-0.5 w-full text-xs mt-2"
-/>
             {/* Due Balance */}
             <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-bold">Due Balance</span>

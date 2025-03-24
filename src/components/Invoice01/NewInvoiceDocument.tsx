@@ -298,11 +298,12 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
          invoiceData.notesContent.branchCode ||
          invoiceData.notesContent.accountNumber);
 
-    // Logs for debugging in non-production environments
+    // Remove console logging for production build to avoid ESLint no-console error
     useEffect(() => {
-        if (process.env.NODE_ENV !== "production") {
-            console.log("Invoice Data before rendering:", invoiceData);
-        }
+        // For development you might log, but it's removed to satisfy CI build
+        // if (process.env.NODE_ENV !== "production") {
+        //     console.log("Invoice Data before rendering:", invoiceData);
+        // }
     }, [invoiceData]);
 
     return (

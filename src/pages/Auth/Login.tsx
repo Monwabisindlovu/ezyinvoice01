@@ -167,7 +167,7 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
           Login
         </button>
       </form>
-
+{/* Removed the OR section
       <div className="flex items-center my-4">
         <div className="flex-grow border-t border-gray-300"></div>
         <span className="mx-2 text-gray-500">OR</span>

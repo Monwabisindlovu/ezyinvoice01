@@ -257,24 +257,27 @@ const TotalsSection: React.FC<TotalsSectionProps> = ({
             </div>
 
             {/* Amount Paid Display - Matches Subtotal, Total, and Due Balance */}
+{/* Amount Paid - Input & Display */}
 <div className="flex items-center justify-between mb-1 relative">
     <span className="text-xs font-bold">Amount Paid</span>
-    <div className="relative w-1/2">
-        <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-xs">
-            {currencySymbol}
-        </span>
-        <input
-            type="number"
-            placeholder="0.00"
-            value={amountPaidInput !== null && !isNaN(amountPaidInput) ? amountPaidInput : ''}
-            onChange={(e) => {
-                const value = e.target.value.trim();
-                setAmountPaidInput(value === '' ? 0 : parseFloat(value));
-            }}
-            className="border rounded-md p-0.5 w-full text-xs pl-6"
-            style={{ height: '34px' }}
-        />
-    </div>
+    
+    {/* Input Field */}
+    <input
+        type="number"
+        placeholder="Enter Amount Paid"
+        value={amountPaidInput !== null && !isNaN(amountPaidInput) ? amountPaidInput : ''}
+        onChange={(e) => {
+            const value = e.target.value.trim();
+            setAmountPaidInput(value === '' ? 0 : parseFloat(value));
+        }}
+        className="border rounded-md p-0.5 w-24 text-xs text-right"
+        style={{ height: '34px' }}
+    />
+    
+    {/* Displayed Value */}
+    <span className="text-xs font-bold">
+        {currencySymbol} {amountPaidInput !== null && !isNaN(amountPaidInput) ? amountPaidInput.toFixed(2) : '0.00'}
+    </span>
 </div>
 
             {/* Due Balance */}

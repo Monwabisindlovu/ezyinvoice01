@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { formatCurrency } from '../../utils/currency';
 
@@ -168,6 +168,7 @@ interface InvoiceData {
     subtotal: number;
     vat: number;
     total: number;
+    notesHeader?: string;
     notesContent?: {
         accountName: string;
         bankName: string;
@@ -175,7 +176,7 @@ interface InvoiceData {
         accountNumber: string;
     };
     termsContent?: string;
-    amountPaid: number; // Amount paid
+    amountPaid: number;
     signature?: string;
     discountPercent?: string;
     shipping?: string;
@@ -187,13 +188,7 @@ interface InvoiceDocumentProps {
 }
 
 const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => {
-    const { currencySymbol, discountPercent, shipping, taxList, amountPaid } = invoiceData;
-
-    const capitalizeFirstLetter = (str: string) =>
-        str
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
+    const { currencySymbol, discountPercent, shipping, taxList } = invoiceData;
 
     const formatCurrencySafe = (value: number, symbol?: string) => {
         return formatCurrency(value, symbol || "$"); // Provide default currency symbol if undefined
@@ -218,6 +213,7 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
 
         total -= calculateDiscountAmount();
         total += parseFloat(shipping ?? '0') || 0;
+
 
         return total;
     };
@@ -255,25 +251,13 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
         return null;
     };
 
-    const renderPaymentDetails = () => {
-        if (amountPaid > 0) {
-            const dueBalance = calculateTotal() - amountPaid;
-
-            return (
-                <View style={styles.totals}>
-                    <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>Amount Paid:</Text>
-                        <Text>{formatCurrencySafe(amountPaid, currencySymbol || "$")}</Text>
-                    </View>
-                    <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>Due Balance:</Text>
-                        <Text>{formatCurrencySafe(dueBalance, currencySymbol || "$")}</Text>
-                    </View>
-                </View>
-            );
-        }
-        return null;
-    };
+   // Logs for debugging
+useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.log("Invoice Data before rendering:", invoiceData);
+    }
+}, [invoiceData]);
 
     return (
         <Document>
@@ -282,7 +266,10 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                 <View style={styles.header}>
                     <View style={styles.companyInfo}>
                         {invoiceData.logo && (
-                            <Image src={invoiceData.logo} style={styles.logo} />
+                            <>
+                                {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                                <Image src={invoiceData.logo} style={styles.logo} />
+                            </>
                         )}
                         <Text>{invoiceData.from}</Text>
                     </View>
@@ -324,10 +311,10 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                             <Text style={[styles.tableCol, { width: '50%' }]}>{item.description}</Text>
                             <Text style={[styles.tableCol, { width: '10%' }]}>{item.quantity}</Text>
                             <Text style={[styles.tableCol, { width: '20%', textAlign: 'right' }]}>
-                                {formatCurrencySafe(item.rate, currencySymbol || "$")}
+                                {formatCurrencySafe(item.rate, currencySymbol || "$")} {/* Safe fallback */}
                             </Text>
                             <Text style={[styles.tableCol, { width: '20%', textAlign: 'right' }]}>
-                                {formatCurrencySafe(item.amount, currencySymbol || "$")}
+                                {formatCurrencySafe(item.amount, currencySymbol || "$")} {/* Safe fallback */}
                             </Text>
                         </View>
                     ))}
@@ -337,22 +324,24 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                 <View style={styles.totals}>
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Subtotal:</Text>
-                        <Text>{formatCurrencySafe(invoiceData.subtotal, currencySymbol || "$")}</Text>
+                        <Text>{formatCurrencySafe(invoiceData.subtotal, currencySymbol || "$")}</Text> {/* Safeguarding currencySymbol */}
                     </View>
                     {renderTaxDetails()}
                     {renderDiscountDetails()}
                     {renderShippingDetails()}
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Total:</Text>
-                        <Text style={styles.totalValue}>{formatCurrencySafe(calculateTotal(), currencySymbol || "$")}</Text>
+                        <Text style={styles.totalValue}>{formatCurrencySafe(calculateTotal(), currencySymbol || "$")}</Text> {/* Safeguarding currencySymbol */}
                     </View>
-                    {renderPaymentDetails()}
                 </View>
 
                 {/* Signature Section */}
                 {invoiceData.signature && (
                     <View style={styles.signatureContainer}>
-                        <Image src={invoiceData.signature} style={styles.signatureImage} />
+                        <>
+                            {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                          <Image src={invoiceData.signature} style={styles.signatureImage} />
+                        </>
                         <Text style={styles.signatureLabel}>Authorized Signature</Text>
                     </View>
                 )}
@@ -363,27 +352,23 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                         {/* Bank Details Section */}
                         {invoiceData.notesContent && (
                             <View style={styles.bankDetailsSection}>
-                                <Text style={styles.doubleDottedHeader}>Bank Details</Text>
+                                <Text style={[styles.doubleDottedHeader]}>Bank Details</Text>
                                 <View style={{ marginLeft: 10 }}>
                                     {/* Account Name */}
-                                    {invoiceData.notesContent.accountName && (
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-                                            <Text style={styles.bankDetailLabel}>Account Name:</Text>
-                                            <Text style={styles.dottedUnderline}>
-                                                {capitalizeFirstLetter(invoiceData.notesContent.accountName)}
-                                            </Text>
-                                        </View>
-                                    )}
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+                                        <Text style={styles.bankDetailLabel}>Account Name:</Text>
+                                        <Text style={styles.dottedUnderline}>
+                                            {invoiceData.notesContent.accountName || 'N/A'}
+                                        </Text>
+                                    </View>
 
                                     {/* Bank Name */}
-                                    {invoiceData.notesContent.bankName && (
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-                                            <Text style={styles.bankDetailLabel}>Bank Name:</Text>
-                                            <Text style={styles.dottedUnderline}>
-                                                {capitalizeFirstLetter(invoiceData.notesContent.bankName)}
-                                            </Text>
-                                        </View>
-                                    )}
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+                                        <Text style={styles.bankDetailLabel}>Bank Name:</Text>
+                                        <Text style={styles.dottedUnderline}>
+                                            {invoiceData.notesContent.bankName || 'N/A'}
+                                        </Text>
+                                    </View>
 
                                     {/* Branch Code */}
                                     {invoiceData.notesContent.branchCode && (
@@ -396,20 +381,19 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                                     )}
 
                                     {/* Account Number */}
-                                    {invoiceData.notesContent.accountNumber && (
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-                                            <Text style={styles.bankDetailLabel}>Account Number:</Text>
-                                            <Text style={styles.dottedUnderline}>
-                                                {invoiceData.notesContent.accountNumber}
-                                            </Text>
-                                        </View>
-                                    )}
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+                                        <Text style={styles.bankDetailLabel}>Account Number:</Text>
+                                        <Text style={styles.dottedUnderline}>
+                                            {invoiceData.notesContent.accountNumber || 'N/A'}
+                                        </Text>
+                                    </View>
                                 </View>
                             </View>
                         )}
+                        {/* Conditional rendering for Terms and Conditions */}
                         {invoiceData.termsContent && (
                             <View style={{ marginTop: 20 }}>
-                                <Text style={styles.doubleDottedHeader}>Terms and Conditions</Text>
+                                <Text style={[styles.doubleDottedHeader]}>Terms and Conditions</Text>
                                 <Text style={{ fontSize: 11 }}>{invoiceData.termsContent}</Text>
                             </View>
                         )}

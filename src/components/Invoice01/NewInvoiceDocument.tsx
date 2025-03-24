@@ -169,13 +169,13 @@ interface InvoiceData {
     vat: number;
     total: number;
     notesContent?: {
-        accountName?: string;
-        bankName?: string;
-        branchCode?: string;
-        accountNumber?: string;
+        accountName: string;
+        bankName: string;
+        branchCode: string;
+        accountNumber: string;
     };
     termsContent?: string;
-    amountPaid?: number;
+    amountPaid: number; // Amount paid
     signature?: string;
     discountPercent?: string;
     shipping?: string;
@@ -187,24 +187,27 @@ interface InvoiceDocumentProps {
 }
 
 const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => {
-    const { currencySymbol, discountPercent, shipping, taxList } = invoiceData;
+    const { currencySymbol, discountPercent, shipping, taxList, amountPaid } = invoiceData;
 
-    // Helper function to format currency safely
+    // Capitalize the first letter of each word in a string
+    const capitalizeFirstLetter = (str: string) =>
+        str
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+
     const formatCurrencySafe = (value: number, symbol?: string) => {
-        return formatCurrency(value, symbol || "$");
+        return formatCurrency(value, symbol || "$"); // Provide default currency symbol if undefined
     };
 
-    // Helper function to calculate tax amount
     const calculateTaxAmount = (subtotal: number, taxPercent: number) => {
         return (subtotal * taxPercent) / 100;
     };
 
-    // Calculate discount amount
     const calculateDiscountAmount = () => {
         return discountPercent ? (parseFloat(discountPercent) / 100) * invoiceData.subtotal : 0;
     };
 
-    // Calculate total including tax, discount and shipping
     const calculateTotal = () => {
         let total = invoiceData.subtotal;
 
@@ -220,26 +223,10 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
         return total;
     };
 
-    // Calculate due balance if amount paid is provided
-    const calculateDueBalance = () => {
-        if (invoiceData.amountPaid) {
-            return calculateTotal() - invoiceData.amountPaid;
-        }
-        return calculateTotal();
-    };
-
-    // Capitalize first letter of each word
-    const capitalizeWords = (str: string) => {
-        return str.replace(/\b\w/g, char => char.toUpperCase());
-    };
-
-    // Render tax details if any tax exists
     const renderTaxDetails = () => {
         return taxList?.map((tax, index) => (
             <View style={styles.totalRow} key={index}>
-                <Text style={styles.totalLabel}>
-                    {tax.name} ({tax.percent}%):
-                </Text>
+                <Text style={styles.totalLabel}>{tax.name} ({tax.percent}%):</Text>
                 <Text>
                     {formatCurrencySafe(calculateTaxAmount(invoiceData.subtotal, tax.percent), currencySymbol || "$")}
                 </Text>
@@ -247,7 +234,6 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
         )) || null;
     };
 
-    // Render discount details if discount is provided
     const renderDiscountDetails = () => {
         const discountAmount = calculateDiscountAmount();
         return discountPercent ? (
@@ -258,7 +244,6 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
         ) : null;
     };
 
-    // Render shipping details if shipping is provided
     const renderShippingDetails = () => {
         if (shipping) {
             return (
@@ -271,39 +256,31 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
         return null;
     };
 
-    // Render amount paid and due balance if amountPaid is provided
-    const renderAmountPaidDetails = () => {
-        if (invoiceData.amountPaid !== undefined && invoiceData.amountPaid !== null) {
+    const renderPaymentDetails = () => {
+        if (amountPaid > 0) {
+            const dueBalance = calculateTotal() - amountPaid;
+
             return (
-                <>
+                <View style={styles.totals}>
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Amount Paid:</Text>
-                        <Text>{formatCurrencySafe(invoiceData.amountPaid, currencySymbol || "$")}</Text>
+                        <Text>{formatCurrencySafe(amountPaid, currencySymbol || "$")}</Text>
                     </View>
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Due Balance:</Text>
-                        <Text>{formatCurrencySafe(calculateDueBalance(), currencySymbol || "$")}</Text>
+                        <Text>{formatCurrencySafe(dueBalance, currencySymbol || "$")}</Text>
                     </View>
-                </>
+                </View>
             );
         }
         return null;
     };
 
-    // Check if any bank details are provided
-    const bankDetailsProvided =
-        invoiceData.notesContent &&
-        (invoiceData.notesContent.accountName ||
-         invoiceData.notesContent.bankName ||
-         invoiceData.notesContent.branchCode ||
-         invoiceData.notesContent.accountNumber);
-
-    // Remove console logging for production build to avoid ESLint no-console error
+    // Logs for debugging
     useEffect(() => {
-        // For development you might log, but it's removed to satisfy CI build
-        // if (process.env.NODE_ENV !== "production") {
-        //     console.log("Invoice Data before rendering:", invoiceData);
-        // }
+        if (process.env.NODE_ENV !== "production") {
+            console.log("Invoice Data before rendering:", invoiceData);
+        }
     }, [invoiceData]);
 
     return (
@@ -313,10 +290,7 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                 <View style={styles.header}>
                     <View style={styles.companyInfo}>
                         {invoiceData.logo && (
-                            <>
-                                {/* eslint-disable-next-line jsx-a11y/alt-text */}
-                                <Image src={invoiceData.logo} style={styles.logo} />
-                            </>
+                            <Image src={invoiceData.logo} style={styles.logo} />
                         )}
                         <Text>{invoiceData.from}</Text>
                     </View>
@@ -378,52 +352,49 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                     {renderShippingDetails()}
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Total:</Text>
-                        <Text style={styles.totalValue}>
-                            {formatCurrencySafe(calculateTotal(), currencySymbol || "$")}
-                        </Text>
+                        <Text style={styles.totalValue}>{formatCurrencySafe(calculateTotal(), currencySymbol || "$")}</Text>
                     </View>
-                    {renderAmountPaidDetails()}
+                    {renderPaymentDetails()} {/* Only render Amount Paid if exists */}
                 </View>
 
                 {/* Signature Section */}
                 {invoiceData.signature && (
                     <View style={styles.signatureContainer}>
-                        <>
-                            {/* eslint-disable-next-line jsx-a11y/alt-text */}
-                            <Image src={invoiceData.signature} style={styles.signatureImage} />
-                        </>
+                        <Image src={invoiceData.signature} style={styles.signatureImage} />
                         <Text style={styles.signatureLabel}>Authorized Signature</Text>
                     </View>
                 )}
 
                 {/* Notes and Terms */}
-                {(bankDetailsProvided || invoiceData.termsContent) && (
+                {(invoiceData.notesContent || invoiceData.termsContent) && (
                     <View style={styles.terms}>
                         {/* Bank Details Section */}
-                        {bankDetailsProvided && (
+                        {invoiceData.notesContent && (
                             <View style={styles.bankDetailsSection}>
                                 <Text style={[styles.doubleDottedHeader]}>Bank Details</Text>
                                 <View style={{ marginLeft: 10 }}>
                                     {/* Account Name */}
-                                    {invoiceData.notesContent?.accountName && (
+                                    {invoiceData.notesContent.accountName && (
                                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
                                             <Text style={styles.bankDetailLabel}>Account Name:</Text>
                                             <Text style={styles.dottedUnderline}>
-                                                {capitalizeWords(invoiceData.notesContent.accountName)}
+                                                {capitalizeFirstLetter(invoiceData.notesContent.accountName)}
                                             </Text>
                                         </View>
                                     )}
+
                                     {/* Bank Name */}
-                                    {invoiceData.notesContent?.bankName && (
+                                    {invoiceData.notesContent.bankName && (
                                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
                                             <Text style={styles.bankDetailLabel}>Bank Name:</Text>
                                             <Text style={styles.dottedUnderline}>
-                                                {capitalizeWords(invoiceData.notesContent.bankName)}
+                                                {capitalizeFirstLetter(invoiceData.notesContent.bankName)}
                                             </Text>
                                         </View>
                                     )}
+
                                     {/* Branch Code */}
-                                    {invoiceData.notesContent?.branchCode && (
+                                    {invoiceData.notesContent.branchCode && (
                                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
                                             <Text style={styles.bankDetailLabel}>Branch Code:</Text>
                                             <Text style={styles.dottedUnderline}>
@@ -431,8 +402,9 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                                             </Text>
                                         </View>
                                     )}
+
                                     {/* Account Number */}
-                                    {invoiceData.notesContent?.accountNumber && (
+                                    {invoiceData.notesContent.accountNumber && (
                                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
                                             <Text style={styles.bankDetailLabel}>Account Number:</Text>
                                             <Text style={styles.dottedUnderline}>
@@ -443,7 +415,7 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                                 </View>
                             </View>
                         )}
-                        {/* Terms and Conditions */}
+                        {/* Conditional rendering for Terms and Conditions */}
                         {invoiceData.termsContent && (
                             <View style={{ marginTop: 20 }}>
                                 <Text style={[styles.doubleDottedHeader]}>Terms and Conditions</Text>

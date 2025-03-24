@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { FcGoogle } from 'react-icons/fc';
+import { FcGoogle } from 'react-icons/fc'; // You can keep this import if you plan to use it later
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
@@ -84,12 +84,14 @@ const Register = () => {
     }
   };
 
+  // Commented out Google login functionality
+  /*
   const googleLogin = async () => {
     const googleLoginURL = `${process.env.REACT_APP_API_URL}/auth/google`;
     window.location.href = googleLoginURL;
   };
+  */
   
-
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-semibold mb-4">Sign Up</h2>
@@ -177,14 +179,16 @@ const Register = () => {
         <div className="flex-grow border-t border-gray-300"></div>
       </div>
 
+      {/* Commented out Google login button
       <button
         onClick={googleLogin}
         className="w-full bg-red-500 text-white py-2 rounded mt-2 flex items-center justify-center"
       >
         <FcGoogle className="mr-2" /> Sign up with Google
       </button>
+      */}
     </div>
   );
 };
 
-export default Register; 
+export default Register;

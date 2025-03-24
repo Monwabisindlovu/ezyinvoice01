@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from 'services/authService';
-import { FcGoogle } from 'react-icons/fc';
+import { FcGoogle } from 'react-icons/fc'; // You can keep this import if you plan to use it later
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 
 interface LoginProps {
@@ -56,6 +56,8 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
     }
   };
 
+  // Commented out Google Login functionality
+  /*
   const handleGoogleLogin = useCallback(async () => {
     try {
       const googleToken = await new Promise<string>((resolve, reject) => {
@@ -96,7 +98,7 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
     const initGoogleSignIn = () => {
       if (window.google && window.google.accounts) {
         window.google.accounts.id.initialize({
-          client_id: '983836517699-4p2l7t8uuqfd6rrks5teprbioh599d35.apps.googleusercontent.com',
+          client_id: 'YOUR_CLIENT_ID', // Ensure to replace this with your actual client ID
           callback: handleGoogleLogin,
         });
         window.google.accounts.id.renderButton(
@@ -118,6 +120,7 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
       document.body.appendChild(script);
     }
   }, [handleGoogleLogin]);
+  */
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
@@ -171,7 +174,9 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
         <div className="flex-grow border-t border-gray-300"></div>
       </div>
 
-      <div id="google-login-btn" className="w-full"></div> {/* Google login button container */}
+      {/* Commented out Google login button container
+      <div id="google-login-btn" className="w-full"></div>
+      */}
 
       <div className="text-sm text-center mt-4">
         <a href="/forgot-password" className="text-blue-500 hover:underline">

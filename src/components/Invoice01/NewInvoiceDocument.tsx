@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { formatCurrency } from '../../utils/currency';
 
@@ -189,7 +189,6 @@ interface InvoiceDocumentProps {
 const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => {
     const { currencySymbol, discountPercent, shipping, taxList, amountPaid } = invoiceData;
 
-    // Capitalize the first letter of each word in a string
     const capitalizeFirstLetter = (str: string) =>
         str
             .split(' ')
@@ -276,13 +275,6 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
         return null;
     };
 
-    // Logs for debugging
-    useEffect(() => {
-        if (process.env.NODE_ENV !== "production") {
-            console.log("Invoice Data before rendering:", invoiceData);
-        }
-    }, [invoiceData]);
-
     return (
         <Document>
             <Page size="A4" style={styles.page}>
@@ -354,7 +346,7 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                         <Text style={styles.totalLabel}>Total:</Text>
                         <Text style={styles.totalValue}>{formatCurrencySafe(calculateTotal(), currencySymbol || "$")}</Text>
                     </View>
-                    {renderPaymentDetails()} {/* Only render Amount Paid if exists */}
+                    {renderPaymentDetails()}
                 </View>
 
                 {/* Signature Section */}
@@ -371,7 +363,7 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                         {/* Bank Details Section */}
                         {invoiceData.notesContent && (
                             <View style={styles.bankDetailsSection}>
-                                <Text style={[styles.doubleDottedHeader]}>Bank Details</Text>
+                                <Text style={styles.doubleDottedHeader}>Bank Details</Text>
                                 <View style={{ marginLeft: 10 }}>
                                     {/* Account Name */}
                                     {invoiceData.notesContent.accountName && (
@@ -415,10 +407,9 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                                 </View>
                             </View>
                         )}
-                        {/* Conditional rendering for Terms and Conditions */}
                         {invoiceData.termsContent && (
                             <View style={{ marginTop: 20 }}>
-                                <Text style={[styles.doubleDottedHeader]}>Terms and Conditions</Text>
+                                <Text style={styles.doubleDottedHeader}>Terms and Conditions</Text>
                                 <Text style={{ fontSize: 11 }}>{invoiceData.termsContent}</Text>
                             </View>
                         )}

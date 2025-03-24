@@ -266,9 +266,10 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
     );
 
     useEffect(() => {
-        if (process.env.NODE_ENV !== "production") {
-            console.log("Invoice Data before rendering:", invoiceData);
-        }
+        // Removed console.log for production build
+        // if (process.env.NODE_ENV !== "production") {
+        //     console.log("Invoice Data before rendering:", invoiceData);
+        // }
     }, [invoiceData]);
 
     return (
@@ -278,9 +279,7 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                 <View style={styles.header}>
                     <View style={styles.companyInfo}>
                         {invoiceData.logo && (
-                            <>
-                                <Image src={invoiceData.logo} style={styles.logo} />
-                            </>
+                            <Image src={invoiceData.logo} style={styles.logo} alt="Company Logo" />
                         )}
                         <Text>{invoiceData.from}</Text>
                     </View>
@@ -361,9 +360,7 @@ const NewInvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoiceData }) => 
                 {/* Signature Section */}
                 {invoiceData.signature && (
                     <View style={styles.signatureContainer}>
-                        <>
-                            <Image src={invoiceData.signature} style={styles.signatureImage} />
-                        </>
+                        <Image src={invoiceData.signature} style={styles.signatureImage} alt="Authorized Signature" />
                         <Text style={styles.signatureLabel}>Authorized Signature</Text>
                     </View>
                 )}

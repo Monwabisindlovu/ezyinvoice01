@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import NewInvoiceItems from './NewInvoiceItems';
 import ImageUploader from './ImageUploader';
 import NotesSection from './NotesSection';
@@ -7,11 +7,13 @@ import CurrencySelector from './CurrencySelector';
 import { CURRENCIES, Currency, formatCurrency } from '../../utils/currency';
 import NewInvoiceDocument from './NewInvoiceDocument';
 import { PDFDownloadLink } from '@react-pdf/renderer';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css'; // Import the CSS for DatePicker
 
 const NewInvoiceTemplate: React.FC = () => {
     const [invoiceNumber, setInvoiceNumber] = useState('');
-    const [invoiceDate, setInvoiceDate] = useState('');
-    const [dueDate, setDueDate] = useState('');
+    const [invoiceDate, setInvoiceDate] = useState<Date | null>(null); // Using Date type
+    const [dueDate, setDueDate] = useState<Date | null>(null); // Using Date type
     const [poNumber, setPoNumber] = useState('');
     const [from, setFrom] = useState('');
     const [billToHeader, setBillToHeader] = useState('Bill To');
@@ -113,8 +115,8 @@ const NewInvoiceTemplate: React.FC = () => {
         billTo,
         shipTo: shipTo || '',
         invoiceNumber,
-        invoiceDate,
-        dueDate,
+        invoiceDate: invoiceDate ? invoiceDate.toLocaleDateString('en-US') : '',
+        dueDate: dueDate ? dueDate.toLocaleDateString('en-US') : '',
         poNumber,
         logo: logo ? URL.createObjectURL(logo) : undefined,
         items,
@@ -171,22 +173,20 @@ const NewInvoiceTemplate: React.FC = () => {
 
                 <div className="flex-none pl-10 w-1/4 mt-4">
                     <h3 className="text-xs font-semibold mb-0.5">Invoice Date</h3>
-                    <input
-                        type="text"
-                        placeholder="Invoice Date"
-                        value={invoiceDate}
-                        onChange={(e) => setInvoiceDate(e.target.value)}
+                    <DatePicker
+                        selected={invoiceDate}
+                        onChange={(date: Date | null) => setInvoiceDate(date)}
                         className="border rounded-md p-0.5 w-full text-xs mb-2 placeholder:font-bold"
-                        style={{ height: '34px', width: '100%' }}
+                        dateFormat="MM/dd/yyyy"
+                        placeholderText="MM/DD/YYYY"
                     />
                     <h3 className="text-xs font-semibold mb-0.5 mt-2">Due Date</h3>
-                    <input
-                        type="text"
-                        placeholder="Due Date"
-                        value={dueDate}
-                        onChange={(e) => setDueDate(e.target.value)}
+                    <DatePicker
+                        selected={dueDate}
+                        onChange={(date: Date | null) => setDueDate(date)}
                         className="border rounded-md p-0.5 w-full text-xs mb-2 placeholder:font-bold"
-                        style={{ height: '34px', width: '100%' }}
+                        dateFormat="MM/dd/yyyy"
+                        placeholderText="MM/DD/YYYY"
                     />
                 </div>
             </div>
@@ -279,7 +279,7 @@ const NewInvoiceTemplate: React.FC = () => {
                         <ImageUploader
                             image={signature ? URL.createObjectURL(signature) : null}
                             onChange={handleSignatureChange}
-                            className="h-14,9 w-auto"
+                            className="h-14 w-auto"
                             label=""
                         />
                     </div>

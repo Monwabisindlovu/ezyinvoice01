@@ -47,7 +47,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isAuthenticated, promptLogin 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen lg:space-x-6">
       {/* Invoice Form Section */}
-      <div className="py-8 px-6 my-6 flex min-h-screen shadow-2xl rounded-2xl max-w-4xl flex-col mx-auto border-4 border-gray-100">
+      <div className="py-8 px-6 my-6 flex min-h-screen shadow-2xl rounded-2xl max-w-4xl flex-col mx-auto border-4 border-gray-100 text-sm sm:text-base md:text-lg">
         {/* Header Section */}
         <InvoiceHeader
           from={invoiceData.from}

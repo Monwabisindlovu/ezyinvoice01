@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://ezyinvoice01-backend.onrender.com/api';
+
 // Utility function to handle errors
 const handleError = (error: any) => {
   if (error.response) {
@@ -14,7 +15,7 @@ const getToken = () => {
   return localStorage.getItem('accessToken');
 };
 
-// Create an axios instance with common headers (for authenticated requests)
+// Create an axios instance with common headers
 const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
@@ -22,7 +23,7 @@ const axiosInstance = axios.create({
   },
 });
 
-// Add Authorization header to the axios instance if token exists
+// Add Authorization header to requests
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = getToken();
@@ -31,16 +32,17 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 const authService = {
-  // Signup (Registration)
+  // Register
   register: async (userData: { email?: string; phone?: string; password: string; confirmPassword: string }) => {
     try {
-      const payload: Record<string, string> = { password: userData.password, confirmPassword: userData.confirmPassword };
+      const payload: Record<string, string> = {
+        password: userData.password,
+        confirmPassword: userData.confirmPassword,
+      };
 
       if (userData.email) payload.email = userData.email;
       if (userData.phone) payload.phone = userData.phone;
@@ -48,19 +50,14 @@ const authService = {
       const response = await axiosInstance.post(`/auth/register`, payload);
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
+      throw new Error(handleError(error));
     }
   },
 
-  // Login (both email or phone supported)
+  // Login
   login: async (loginData: { emailOrPhone: string; password: string }) => {
     try {
-      const payload = {
-        emailOrPhone: loginData.emailOrPhone,
-        password: loginData.password,
-      };
-
-      const response = await axiosInstance.post(`/auth/login`, payload);
+      const response = await axiosInstance.post(`/auth/login`, loginData);
       const { token } = response.data;
 
       localStorage.setItem('accessToken', token);
@@ -70,7 +67,7 @@ const authService = {
     }
   },
 
-  // Google OAuth Login/Signup - updated to use /auth/login with googleToken
+  // Google OAuth
   googleAuth: async (googleToken: string) => {
     try {
       const response = await axiosInstance.post(`/auth/login`, { googleToken });
@@ -83,7 +80,7 @@ const authService = {
     }
   },
 
-  // Forgot Password (Send Reset Link via Email or Phone)
+  // Forgot Password
   forgotPassword: async (emailOrPhone: string) => {
     try {
       const response = await axiosInstance.post(`/auth/forgot-password`, { emailOrPhone });
@@ -93,27 +90,15 @@ const authService = {
     }
   },
 
-  // Reset Password
-  resetPassword: async (newPassword: string, token: string) => {
+  // ✅ Unified Reset Password Function
+  resetPassword: async (payload: {
+    token?: string;
+    emailOrPhone?: string;
+    verificationCode?: string;
+    newPassword: string;
+  }) => {
     try {
-      const response = await axiosInstance.post(`/auth/reset-password`, {
-        newPassword,
-        token,
-      });
-      return response.data;
-    } catch (error) {
-      throw new Error(handleError(error));
-    }
-  },
-
-  // Reset Password with Verification Code
-  resetPasswordWithCode: async (emailOrPhone: string, verificationCode: string, newPassword: string) => {
-    try {
-      const response = await axiosInstance.post(`/auth/reset-password`, {
-        emailOrPhone,
-        verificationCode,
-        newPassword,
-      });
+      const response = await axiosInstance.post(`/auth/reset-password`, payload);
       return response.data;
     } catch (error) {
       throw new Error(handleError(error));

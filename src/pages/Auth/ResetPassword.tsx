@@ -4,16 +4,17 @@ import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import authService from '../../services/authService';
 
 const ResetPassword: React.FC = () => {
-  const [emailOrPhone, setEmailOrPhone] = useState<string>('');
-  const [verificationCode, setVerificationCode] = useState<string>('');
-  const [newPassword, setNewPassword] = useState<string>('');
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-  const [successMessage, setSuccessMessage] = useState<string>('');
-  const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
-  const { token } = useParams<string>();
+  const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
 
   const validatePassword = (pwd: string) => {
@@ -26,6 +27,23 @@ const ResetPassword: React.FC = () => {
     );
   };
 
+  const getValidationMessages = (pwd: string) => (
+    <div className="text-sm mb-4 space-y-1">
+      <p className={pwd.length >= 7 && pwd.length <= 12 ? 'text-green-500' : 'text-red-500'}>
+        {pwd.length >= 7 && pwd.length <= 12 ? '✅ Length is valid' : '❌ 7–12 characters required'}
+      </p>
+      <p className={/[A-Za-z]/.test(pwd) ? 'text-green-500' : 'text-red-500'}>
+        {/[A-Za-z]/.test(pwd) ? '✅ Has a letter' : '❌ Include at least one letter'}
+      </p>
+      <p className={/\d/.test(pwd) ? 'text-green-500' : 'text-red-500'}>
+        {/\d/.test(pwd) ? '✅ Has a number' : '❌ Include at least one number'}
+      </p>
+      <p className={/[!@#$%^&*(),.?":{}|<>]/.test(pwd) ? 'text-green-500' : 'text-red-500'}>
+        {/[!@#$%^&*(),.?":{}|<>]/.test(pwd) ? '✅ Has a special character' : '❌ Include a special character'}
+      </p>
+    </div>
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -33,57 +51,40 @@ const ResetPassword: React.FC = () => {
     setSuccessMessage('');
 
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('❌ Passwords do not match.');
       setIsSubmitting(false);
       return;
     }
 
     if (!validatePassword(newPassword)) {
-      setError('Password must be 7-12 characters long, include a letter, a number, and a special character.');
+      setError('❌ Password must meet all requirements.');
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const response = token
-        ? await authService.resetPassword(newPassword, token)
-        : await authService.resetPasswordWithCode(emailOrPhone, verificationCode, newPassword);
+      const payload = token
+        ? { token, newPassword }
+        : { emailOrPhone, verificationCode, newPassword };
+
+      const response = await authService.resetPassword(payload);
 
       if (response.status === 200) {
-        setSuccessMessage('Password reset successful. Redirecting to login...');
-        setTimeout(() => navigate('/login'), 2000);
+        setSuccessMessage('✅ Password reset successful. Redirecting to login...');
+        setTimeout(() => navigate('/login'), 2500);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message);
+      setError(err.response?.data?.message || 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const passwordValidationMessage = (pwd: string) => {
-    return (
-      <div className="text-sm text-red-500 mb-4">
-        <p className={pwd.length >= 7 && pwd.length <= 12 ? 'text-green-500' : 'text-red-500'}>
-          {pwd.length >= 7 && pwd.length <= 12 ? '✅ Length is valid' : '❌ Password must be 7-12 characters long'}
-        </p>
-        <p className={/[A-Za-z]/.test(pwd) ? 'text-green-500' : 'text-red-500'}>
-          {/[A-Za-z]/.test(pwd) ? '✅ Contains a letter' : '❌ Password must include at least one letter'}
-        </p>
-        <p className={/\d/.test(pwd) ? 'text-green-500' : 'text-red-500'}>
-          {/\d/.test(pwd) ? '✅ Contains a number' : '❌ Password must include at least one number'}
-        </p>
-        <p className={/[!@#$%^&*(),.?":{}|<>]/.test(pwd) ? 'text-green-500' : 'text-red-500'}>
-          {/[!@#$%^&*(),.?":{}|<>]/.test(pwd) ? '✅ Contains a special character' : '❌ Password must include a special character'}
-        </p>
-      </div>
-    );
-  };
-
   return (
     <div className="reset-password-container w-full max-w-sm mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Reset Password</h2>
-      {error && <div className="text-red-500">{error}</div>}
-      {successMessage && <div className="text-green-500">{successMessage}</div>}
+      {error && <div className="text-red-500 mb-3">{error}</div>}
+      {successMessage && <div className="text-green-600 font-medium mb-3">{successMessage}</div>}
 
       <form onSubmit={handleSubmit}>
         {!token && (
@@ -99,7 +100,6 @@ const ResetPassword: React.FC = () => {
                 className="w-full p-2 border border-gray-300 rounded"
               />
             </div>
-
             <div className="mb-4">
               <label htmlFor="verificationCode">Verification Code</label>
               <input
@@ -133,7 +133,7 @@ const ResetPassword: React.FC = () => {
           </button>
         </div>
 
-        {passwordValidationMessage(newPassword)}
+        {getValidationMessages(newPassword)}
 
         <div className="relative mb-4">
           <label htmlFor="confirmPassword">Confirm New Password</label>
@@ -144,7 +144,7 @@ const ResetPassword: React.FC = () => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             className={`w-full p-2 border rounded ${
-              newPassword === confirmPassword ? 'border-green-500' : 'border-red-500'
+              confirmPassword && newPassword !== confirmPassword ? 'border-red-500' : 'border-gray-300'
             }`}
           />
           <button
@@ -156,18 +156,11 @@ const ResetPassword: React.FC = () => {
           </button>
         </div>
 
-        {!validatePassword(newPassword) && newPassword && (
-          <div className="text-sm text-red-500 mb-4">
-            <p>❌ Password must be 7-12 characters long</p>
-            <p>❌ Include at least one letter, one number, and one special character</p>
-          </div>
-        )}
-
-        {newPassword !== confirmPassword && confirmPassword && (
-          <div className="text-sm text-red-500 mb-4">❌ Passwords do not match</div>
-        )}
-
-        <button type="submit" disabled={isSubmitting} className="w-full bg-blue-500 text-white py-2 rounded">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition"
+        >
           {isSubmitting ? 'Resetting...' : 'Reset Password'}
         </button>
       </form>
